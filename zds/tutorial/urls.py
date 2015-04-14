@@ -25,6 +25,18 @@ urlpatterns = patterns('',
                        url(r'^off/(?P<tutorial_pk>\d+)/(?P<tutorial_slug>.+)/$',
                            'zds.tutorial.views.view_tutorial'),
 
+                       # Beta URLs
+                       url(r'^beta/(?P<tutorial_pk>\d+)/(?P<tutorial_slug>.+)/(?P<part_pk>\d+)/(?P<part_slug>.+)/(?P<chapter_pk>\d+)/(?P<chapter_slug>.+)/$',
+                           'zds.tutorial.views.view_chapter_beta',
+                           name="view-chapter-url-beta"),
+
+                       url(r'^beta/(?P<tutorial_pk>\d+)/(?P<tutorial_slug>.+)/(?P<part_pk>\d+)/(?P<part_slug>.+)/$',
+                           'zds.tutorial.views.view_part_beta',
+                           name="view-part-url-beta"),
+
+                       url(r'^beta/(?P<tutorial_pk>\d+)/(?P<tutorial_slug>.+)/$',
+                           'zds.tutorial.views.view_tutorial_beta'),
+
                        # View online
                        url(r'^(?P<tutorial_pk>\d+)/(?P<tutorial_slug>.+)/(?P<part_pk>\d+)/(?P<part_slug>.+)/(?P<chapter_pk>\d+)/(?P<chapter_slug>.+)/$',
                            'zds.tutorial.views.view_chapter_online',
@@ -102,7 +114,8 @@ urlpatterns = patterns('',
                            'zds.tutorial.views.invalid_tutorial'),
                        url(r'^validation/historique/(?P<tutorial_pk>\d+)/$',
                            'zds.tutorial.views.history_validation'),
-
+                       url(r'^activation_js/$',
+                           'zds.tutorial.views.activ_js'),
                        # Reactions
                        url(r'^message/editer/$',
                            'zds.tutorial.views.edit_note'),
@@ -110,8 +123,15 @@ urlpatterns = patterns('',
                        url(r'^message/like/$', 'zds.tutorial.views.like_note'),
                        url(r'^message/dislike/$',
                            'zds.tutorial.views.dislike_note'),
+                       url(r'^message/typo/(?P<obj_type>.+)/(?P<obj_pk>\d+)/$',
+                           'zds.tutorial.views.warn_typo'),
 
                        # Moderation
                        url(r'^resolution_alerte/$',
                            'zds.tutorial.views.solve_alert'),
+
+                       # Help
+                       url(r'^aides/$',
+                           'zds.tutorial.views.help_tutorial'),
                        )
+

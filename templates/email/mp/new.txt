@@ -1,9 +1,8 @@
-Bonjour {{ username }},
+{% extends "email/base_from_staff.txt" %}
+{% load i18n %}
 
-{{ author }} vous a envoyé un message privé sur Zeste de Savoir
+{% block content_from_staff %}
+{{ author }} {% trans "vous a envoyé un message privé sur" %} {{ site_name }}.
 
-Pour le lire, cliquez ou recopiez l'url suivante : {{ url }}
-
-Cordialement,
-
-L'équipe Zeste de Savoir
+{% trans "Pour le lire," %} {% trans "cliquez ou recopiez l'url suivante" %} : {{ url }}
+{% endblock %}

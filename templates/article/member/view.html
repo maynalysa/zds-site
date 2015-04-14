@@ -3,20 +3,22 @@
 {% load profile %}
 {% load date %}
 {% load thumbnail %}
+{% load i18n %}
+
 
 
 
 {% block title_base %}
-    &bull; Articles
+    &bull; {% trans "Articles" %}
 {% endblock %}
 
 
 
 {% block breadcrumb_base %}
     {% if user in authors.all %}
-        <li><a href="{% url "zds.member.views.articles" %}">Mes articles</a></li>
+        <li><a href="{% url "zds.member.views.articles" %}">{% trans "Mes articles" %}</a></li>
     {% else %}
-        <li><a href="{% url "zds.article.views.index" %}">Articles</a></li>
+        <li><a href="{% url "zds.article.views.index" %}">{% trans "Articles" %}</a></li>
     {% endif %}
 {% endblock %}
 
@@ -41,18 +43,18 @@
 
 
 {% block headline %}
+    {% if article.licence %}
+        <span class="license">
+            {{ article.licence }}
+        </span>
+    {% endif %}
+
     <h1 {% if article.image %}class="illu"{% endif %}>
         {% if article.image %}
             <img src="{{article.image.article_illu.url }}" alt="">
         {% endif %}
         {{ article.title }}
     </h1>
-    
-    {% if article.licence %}
-        <span class="license">
-            {{ article.licence }}
-        </span>
-    {% endif %}
 
     {% if article.description %}
         <h2 class="subtitle">
@@ -70,17 +72,19 @@
         {% endfor %}
     </ul>
 
-    {% if article.sha_public %}
+    {% if article.update %}
         <span class="pubdate">
-            Publié 
-            <time datetime="{{ article.pubdate|date:"c" }}" pubdate="pubdate" itemprop="datePublished">
-                {{ article.pubdate|format_date }}
+            {% trans "Dernière mise à jour" %} :
+            <time datetime="{{ article.update|date:"c" }}" pubdate="pubdate" itemprop="dateModified">
+                {{ article.update|format_date }}
             </time>
         </span>
     {% endif %}
-    
+
+    {% include "misc/zen_button.part.html" %}
+
     <div class="authors">
-        <span class="authors-label">Contributeur{{ authors.all|pluralize }} : </span>
+        <span class="authors-label">{% trans "Contributeur" %}{{ authors.all|pluralize }} : </span>
         <ul>
             {% for member in authors.all %}
                 <li>
@@ -89,7 +93,7 @@
             {% endfor %}
             <li>
                 <a href="#add-author" class="open-modal ico-after more blue">
-                    Ajouter un auteur
+                    {% trans "Ajouter un auteur" %}
                 </a>
             </li>
         </ul>
@@ -100,22 +104,22 @@
             {% if validation.version == version %}
                 {% if validation.validator == None %}
                     <p class="content-wrapper alert-box alert">
-                        Cet article est en attente d'un validateur
+                        {% trans "Cet article est en attente d'un validateur" %}
                     </p>
                 {% else %}
                     <p class="content-wrapper alert-box info">
-                        L'article est en cours de validation par
+                        {% trans "L'article est en cours de validation par" %}
                         {% include "misc/member_item.part.html" with member=validation.validator %}
                     </p>
                 {% endif %}
                 {% if validation.comment_authors %}
                     <div class="content-wrapper comment-author">
                         <p>
-                            Le message suivant a été laissé à destination des validateurs :
+                            {% trans "Le message suivant a été laissé à destination des validateurs" %} :
                         </p>
 
                         <blockquote>
-                            {{ validation.comment_authors }}
+                            {{ validation.comment_authors|emarkdown }}
                         </blockquote>
                     </div>
                 {% endif %}
@@ -123,14 +127,14 @@
                 {% if validation.validator == None %}
                     <p class="content-wrapper alert-box alert">
                         <a href="{{ article.get_absolute_url }}?version={{ validation.version }}">
-                            Une autre version de cet article</a>
-                        est en attente d'un validateur
+                            {% trans "Une autre version de cet article" %}</a>
+                        {% trans "est en attente d'un validateur" %}
                     </p>
                 {% else %}
                     <p class="content-wrapper alert-box info">
                         <a href="{{ article.get_absolute_url }}?version={{ validation.version }}">
-                            Une autre version de cet article</a>
-                        est en cours de validation par
+                            {% trans "Une autre version de cet article" %}</a>
+                        {% trans "est en cours de validation par" %}
                         {% include "misc/member_item.part.html" with member=validation.validator %}
                     </p>
                 {% endif %}
@@ -143,6 +147,6 @@
 
 {% block content %}
     <div>
-        {{ article.txt|emarkdown }}
+        {{ article.txt|emarkdown:is_js }}
     </div>
 {% endblock %}

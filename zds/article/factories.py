@@ -3,19 +3,14 @@
 from datetime import datetime
 import factory
 from git.repo import Repo
-try:
-    import ujson as json_reader
-except:
-    try:
-        import simplejson as json_reader
-    except:
-        import json as json_reader
 
 import json as json_writer
 import os
 from zds.article.models import Article, Reaction, \
     Validation, Licence
 from zds.utils.articles import export_article
+from zds.article.views import mep
+from zds.utils.models import SubCategory
 
 
 class ArticleFactory(factory.DjangoModelFactory):
@@ -68,12 +63,13 @@ class ReactionFactory(factory.DjangoModelFactory):
         return reaction
 
 
-class VaidationFactory(factory.DjangoModelFactory):
+class ValidationFactory(factory.DjangoModelFactory):
     FACTORY_FOR = Validation
+
 
 class LicenceFactory(factory.DjangoModelFactory):
     FACTORY_FOR = Licence
-    
+
     code = u'GNU_GPL'
     title = u'GNU General Public License'
 
@@ -81,4 +77,24 @@ class LicenceFactory(factory.DjangoModelFactory):
     def _prepare(cls, create, **kwargs):
         licence = super(LicenceFactory, cls)._prepare(create, **kwargs)
         return licence
-    
+
+
+class PublishedArticleFactory(ArticleFactory):
+    FACTORY_FOR = Article
+
+    @classmethod
+    def _prepare(cls, create, **kwargs):
+        article = super(PublishedArticleFactory, cls)._prepare(create, **kwargs)
+        mep(article, article.sha_draft)
+        article.sha_public = article.sha_draft
+        article.pubdate = datetime.now()
+        article.save()
+        return article
+
+
+class SubCategoryFactory(factory.DjangoModelFactory):
+    FACTORY_FOR = SubCategory
+
+    title = factory.Sequence(lambda n: 'Sous-Categorie {0} pour l\'article'.format(n))
+    subtitle = factory.Sequence(lambda n: 'Sous titre de Sous-Categorie {0} pour l\'article'.format(n))
+    slug = factory.Sequence(lambda n: 'sous-categorie-{0}'.format(n))

@@ -1,124 +1,102 @@
 [![Build Status](https://travis-ci.org/zestedesavoir/zds-site.svg?branch=dev)](https://travis-ci.org/zestedesavoir/zds-site)
 [![Coverage Status](https://coveralls.io/repos/zestedesavoir/zds-site/badge.png?branch=dev)](https://coveralls.io/r/zestedesavoir/zds-site?branch=dev)
-[![Licnce GPL](http://img.shields.io/badge/license-GPL-yellow.svg)](http://www.gnu.org/licenses/quick-guide-gplv3.fr.html)
+[![Code Health](https://landscape.io/github/zestedesavoir/zds-site/dev/landscape.svg)](https://landscape.io/github/zestedesavoir/zds-site/dev)
+
+[![Requirements Status](https://requires.io/github/zestedesavoir/zds-site/requirements.svg?branch=dev)](https://requires.io/github/zestedesavoir/zds-site/requirements/?branch=dev)
+[![Dependency Status](https://david-dm.org/zestedesavoir/zds-site.svg)](https://david-dm.org/zestedesavoir/zds-site)
+
+[![Licence GPL](http://img.shields.io/badge/license-GPL-yellow.svg)](http://www.gnu.org/licenses/quick-guide-gplv3.fr.html)
+[![Documentation Status](https://readthedocs.org/projects/zds-site/badge/?version=latest)](https://readthedocs.org/projects/zds-site/?badge=latest)
+
+# Zeste de Savoir
+
+Site internet communautaire codé à l'aide du framework [Django](https://www.djangoproject.com/) 1.7 et de [Python](https://www.python.org/) 2.7.
+
+[Voir l'instance en ligne](https://zestedesavoir.com).
 
 
+## Fonctionnalités implémentées
 
-
-
-Zeste de Savoir
-===============
-
-Site internet communautaire codé à l'aide du framework [Django](https://www.djangoproject.com/) 1.6 et de [Python](https://www.djangoproject.com/) 2.7.
-
-* Lien du site : [zestedesavoir](http://www.zestedesavoir.com)
-
-
-
-
-
-Fonctionnalités implementées
-----------------------------
-
-- Membres
 - Tutoriels
 - Articles
+- Membres
 - Forums
 - Messages privés
 - Galeries d'images
 - Recherche
 
 
+## Fonctionnalités à venir
+
+Elles sont reportées essentiellement dans le [*bugtraker*](https://github.com/zestedesavoir/zds-site/issues).
 
 
-
-Fonctionnalités à venir
------------------------
-
-Elles sont reportées essentiellement dans le [bugtraker](https://github.com/zestedesavoir/zds-site/issues).
-
-
-
-
-
-Comment démarrer une instance de ZdS ?
---------------------------------------
-
+## Comment démarrer une instance de ZdS ?
 
 ### Installation d'une version locale de ZdS
-- [Intallation sur Windows](doc/install-windows.md)
-- [Intallation sur Linux](doc/install-linux.md)
-- [Intallation sur OS X](doc/install-os-x.md)
+
+- [Installation du backend sur Windows](http://zds-site.readthedocs.org/fr/latest/install/backend-windows-install.html)
+- [Installation du backend sur Linux](http://zds-site.readthedocs.org/fr/latest/install/backend-linux-install.html)
+- [Installation du backend sur OS X](http://zds-site.readthedocs.org/fr/latest/install/backend-os-x-install.html)
+- [Installation du frontend](http://zds-site.readthedocs.org/fr/latest/install/frontend-install.html)
+- [Installation de Solr](http://zds-site.readthedocs.org/fr/latest/install/install-solr.html) pour gérer la recherche
 
 
 ### Mettre à jour votre version locale de ZdS
-Après avoir mis à jour votre dépot, vous devez executer les commandes suivantes (depuis la racine de votre projet) pour mettre à jour les dépendances.
 
-```
+Après avoir mis à jour votre dépôt, vous devez exécuter les commandes suivantes (depuis la racine de votre projet) pour mettre à jour les dépendances.
+
+```console
+pip install --upgrade -r requirements.txt -r requirements-dev.txt
 python manage.py migrate
-pip install --upgrade -r requirements.txt
 ```
 
 
 ### Données de test
+
 Pour bénéficier de données de test, exécutez les commandes suivantes, dans l'ordre, à la fin des précédentes :
 
 ```console
-python manage.py loaddata fixtures/users.yaml fixtures/forums.yaml fixtures/topics.yaml fixtures/mps.yaml fixtures/categories.yaml fixtures/licences.yaml
-
+python manage.py loaddata fixtures/*.yaml
+python manage.py load_factory_data fixtures/advanced/aide_tuto_media.yaml
 ```
 
 Cela va créer plusieurs entitées :
 
-* 3 utilisateurs (utilisateur/mot de passe) :
+* 6 utilisateurs (utilisateur/mot de passe) :
 	* user/user : Utilisateur normal
 	* staff/staff : Utilisateur avec les droits d'un staff
 	* admin/admin : Utilisateur avec les droits d'un staff et d'un admin
+	* anonymous/anonymous : Utilisateur qui permet l'anonymisation des messages sur les forums
+	* Auteur externe/external : Utilisateur qui permet de récupérer les tutoriels d'anciens membres et/ou de publier des tutoriels externes.
+	* ïtrema/ïtrema : Utilisateur de test supplémentaire sans droit
 * 3 catégories
 * 11 forums
 * 3 sujets avec une réponse
 * 1 message privé (MP) avec 3 participants
 * 3 catégories et 2 sous-catégories
+* 4 aides pour l'écriture des tutoriels
 
 
-### Conseils de developpement
+### La documentation complète
 
-Avant de faire une Pull Request (PR), vérifiez que votre code passe tous les tests unitaires et qu'il est compatible [PEP-8](http://legacy.python.org/dev/peps/pep-0008/) en exécutant les commandes suivantes, pour le back :
+[Voir la documentation en ligne](http://zds-site.readthedocs.org).
 
-```console
-python manage.py test
-flake8 --exclude=migrations,urls.py --max-line-length=120 --ignore=F403,E126,E127,E128 zds
-```
+La documentation de ZdS est générée par Sphinx, et elle doit être mise à jour à chaque modification ou ajout d'une fonctionnalité du site. Les sources se trouvent [ici](doc/source/).
 
-Pour le front :
-
-```console
-gulp test
-```
-
-Si vous modifiez le modèle (les fichiers models.py), n'oubliez pas de créer les fichiers de migration :
-
-```console
-python manage.py schemamigration app_name --auto
-```
-
-Si vous avez une connexion lente et que vous ne voulez travailler que sur une branche précise, vous pouvez toujours ne récupérer que celle-ci :
-
-```console
-git clone https://github.com/zestedesavoir/zds-site.git -b LA_BRANCHE --depth 1
-```
+Pour générer la documentation en local, rendez-vous dans le répertoire `zds-site/doc/` depuis votre terminal, et lancez la commande `make html`. Vous pourrez ensuite la consulter en ouvrant le fichier `zds-site/doc/build/html/index.html`
 
 
+### Conseils de développement
 
-En savoir plus
---------------
+Vous trouverez tout sur [la page dédiée de la documentation](CONTRIBUTING.md)
 
-- [Comment déployer ZDS sur un serveur de production ?](doc/deploy.md)
-- [Contribuer](CONTRIBUTING.md)
+
+## En savoir plus
+
+- [Comment déployer ZDS sur un serveur de production ?](http://zds-site.readthedocs.org/fr/latest/install/deploiement-production.html)
+- [Comment contribuer et conseils de développement](CONTRIBUTING.md)
 - [Comment contribuer : comprendre comment suivre le workflow (sur zds)](http://zestedesavoir.com/forums/sujet/324/comment-contribuer-comprendre-comment-suivre-le-workflow/)
+- [Les détails du workflow utilisé sur Zeste de Savoir](http://zds-site.readthedocs.org/fr/latest/workflow.html)
 
-
-
-
-
-Zeste de Savoir est basé sur un fork de [Progdupeu.pl](http://progdupeu.pl) ([Dépôt Bitbucket](https://bitbucket.org/MicroJoe/progdupeupl/)).
+Zeste de Savoir est basé sur un fork de [Progdupeupl](https://pdp.microjoe.org) ([voir le dépôt Git](http://git.microjoe.org/progdupeupl/)).

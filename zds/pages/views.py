@@ -9,18 +9,17 @@ from django.contrib.auth.models import Group, User
 from django.core.exceptions import PermissionDenied
 from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
-from django.template import Context
-from django.template.loader import get_template
+from django.template.loader import render_to_string
+from django.shortcuts import render
 from zds import settings
 
 from zds.article.models import get_last_articles
-from zds.forum.models import get_last_topics
 from zds.member.decorator import can_write_and_read_now
 from zds.pages.forms import AssocSubscribeForm
-from zds.settings import SITE_ROOT
+from zds.settings import BASE_DIR
 from zds.tutorial.models import get_last_tutorials
-from zds.utils import render_template, slugify
 from zds.utils.models import Alert
+from django.utils.translation import ugettext as _
 
 
 def home(request):
@@ -39,12 +38,12 @@ def home(request):
         articles.append(data)
 
     try:
-        with open(os.path.join(SITE_ROOT, 'quotes.txt'), 'r') as fh:
+        with open(os.path.join(BASE_DIR, 'quotes.txt'), 'r') as fh:
             quote = random.choice(fh.readlines())
-    except:
-        quote = u'Zeste de Savoir, la connaissance pour tous et sans pépins !'
+    except IOError:
+        quote = settings.ZDS_APP['site']['slogan']
 
-    return render_template('home.html', {
+    return render(request, 'home.html', {
         'last_tutorials': tutos,
         'last_articles': articles,
         'quote': quote,
@@ -52,12 +51,12 @@ def home(request):
 
 
 def index(request):
-    return render_template('pages/index.html')
+    return render(request, 'pages/index.html')
 
 
 def about(request):
     """Display many informations about the website."""
-    return render_template('pages/about.html')
+    return render(request, 'pages/about.html')
 
 
 @can_write_and_read_now
@@ -68,6 +67,11 @@ def assoc_subscribe(request):
         if form.is_valid():
             user = request.user
             data = form.data
+
+            # Send email
+            subject = _(u"Demande d'adhésion de {}").format(user.username)
+            from_email = "{} <{}>".format(settings.ZDS_APP['site']['litteral_name'],
+                                          settings.ZDS_APP['site']['email_noreply'])
             context = {
                 'full_name': data['full_name'],
                 'email': data['email'],
@@ -75,39 +79,38 @@ def assoc_subscribe(request):
                 'adresse': data['adresse'],
                 'justification': data['justification'],
                 'username': user.username,
-                'profile_url': settings.SITE_URL + reverse('zds.member.views.details',
-                                                           kwargs={'user_name': user.username})
+                'profile_url': settings.ZDS_APP['site']['url'] + reverse('member-detail',
+                                                                         kwargs={'user_name': user.username}),
+                'bot_name': settings.ZDS_APP['member']['bot_account'],
+                'asso_name': settings.ZDS_APP['site']['association']['name']
             }
+            message_html = render_to_string("email/pages/assoc_subscribe.html", context)
+            message_txt = render_to_string("email/pages/assoc_subscribe.txt", context)
 
-            # Send email
-            subject = "Demande d'adhésion de {}".format(user.username)
-            from_email = "Zeste de Savoir <{0}>".format(settings.MAIL_NOREPLY)
-            message_html = get_template("email/assoc/subscribe.html").render(Context(context))
-            message_txt = get_template("email/assoc/subscribe.txt") .render(Context(context))
             msg = EmailMultiAlternatives(
                 subject,
                 message_txt,
                 from_email,
-                [settings.MAIL_CA_ASSO])
+                [settings.ZDS_APP['site']['association']['email_ca']])
             msg.attach_alternative(message_html, "text/html")
             try:
                 msg.send()
-                messages.success(request, u"Votre demande d'adhésion a bien été envoyée et va être étudiée.")
+                messages.success(request, _(u"Votre demande d'adhésion a bien été envoyée et va être étudiée."))
             except:
                 msg = None
-                messages.error(request, "Une erreur est survenue.")
+                messages.error(request, _(u"Une erreur est survenue."))
 
             # reset the form after successfull validation
             form = AssocSubscribeForm()
-        return render_template("pages/assoc_subscribe.html", {"form": form})
+        return render(request, "pages/assoc_subscribe.html", {"form": form})
 
     form = AssocSubscribeForm(initial={'email': request.user.email})
-    return render_template("pages/assoc_subscribe.html", {"form": form})
+    return render(request, "pages/assoc_subscribe.html", {"form": form})
 
 
 def association(request):
     """Display association's presentation."""
-    return render_template('pages/association.html')
+    return render(request, 'pages/association.html')
 
 
 def contact(request):
@@ -118,7 +121,7 @@ def contact(request):
     devs = User.objects.filter(
         groups__in=Group.objects.filter(
             name__contains='dev')).all()
-    return render_template('pages/contact.html', {
+    return render(request, 'pages/contact.html', {
         'staffs': staffs,
         'devs': devs
     })
@@ -126,12 +129,12 @@ def contact(request):
 
 def eula(request):
     """End-User Licence Agreement."""
-    return render_template('pages/eula.html')
+    return render(request, 'pages/eula.html')
 
 
 def cookies(request):
     """Cookies explaination page."""
-    return render_template('pages/cookies.html')
+    return render(request, 'pages/cookies.html')
 
 
 @can_write_and_read_now
@@ -143,6 +146,11 @@ def alerts(request):
 
     alerts = Alert.objects.all().order_by('-pubdate')
 
-    return render_template('pages/alerts.html', {
+    return render(request, 'pages/alerts.html', {
         'alerts': alerts,
     })
+
+
+def custom_error_500(request):
+    """Custom view for 500 errors"""
+    return render(request, '500.html')

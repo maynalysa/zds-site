@@ -1,12 +1,13 @@
 {% extends "article/base.html" %}
-
+{% load i18n %}
+{% load topbar %}
 
 
 {% block title %}
     {% if tag %}
         {{ tag }}
     {% else %}
-        Tous les articles
+        {% trans "Tous les articles" %}
     {% endif %}
 {% endblock %}
 
@@ -14,11 +15,9 @@
 
 {% block description %}
     {% if tag %}
-        Articles de la communauté à propos de {{ tag }}. Vous pourrez également découvrir de nouvelles notions en parcourant les autres catégories.
+        {% trans "Articles de la communauté à propos de" %} {{ tag }}. {% trans "Vous pourrez également découvrir de nouvelles notions en parcourant les autres catégories" %}.
     {% else %}
-        Les articles sont rédigés par la communauté. Ils permettent aussi bien de se tenir 
-        informé des dernières innovations du moment que de découvrir de nouvelles notions 
-        liées à différents domaines : sciences, informatiques, ...
+        {% trans "Les articles sont rédigés par la communauté. Ils permettent aussi bien de se tenir informé des dernières innovations du moment que de découvrir de nouvelles notions liées à différents domaines : sciences, informatiques" %}, ...
     {% endif %}
 {% endblock %}
 
@@ -28,7 +27,7 @@
     {% if tag %}
         <li>{{ tag }}</li>
     {% else %}
-        <li>Tous les articles</li>
+        <li>{% trans "Tous les articles" %}</li>
     {% endif %}
 {% endblock %}
 
@@ -39,9 +38,9 @@
         <h2 class="ico-after ico-articles" itemprop="name">
             {% block headline %}
                 {% if tag %}
-                    Articles : {{ tag }}
+                    {% trans "Articles" %} : {{ tag }}
                 {% else %}
-                    Tous les articles
+                    {% trans "Tous les articles" %}
                 {% endif %}
             {% endblock %}
         </h2>
@@ -57,9 +56,58 @@
                 </div>
             {% else %}
                 <p>
-                    Aucun article disponible.
+                    {% trans "Aucun article disponible" %}.
                 </p>
             {% endif %}
         {% endblock %}
     </section>
+{% endblock %}
+
+
+{% block sidebar %}
+    <aside class="sidebar accordeon mobile-menu-bloc"
+           data-title="Catégories des articles"
+    >
+        <a href="{% url "zds.article.views.new" %}" class="new-btn ico-after more blue">
+            {% trans "Nouvel article" %}
+        </a>
+
+        <h3>{% blocktrans %} Catégories <span class="wide">des articles</span> {% endblocktrans %}</h3>
+
+        {% with categories='.'|top_categories_article %}
+            {% for title, subcats in categories.items %}
+                <h4 class="mobile-menu-link">{{ title }}</h4>
+                <ul>
+                    {% for subcat,slug in subcats %}
+                        <li>
+                            <a href="{% url "zds.article.views.index" %}?tag={{ slug }}" class="mobile-menu-link mobile-menu-sublink">
+                                {{  subcat }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% empty %}
+                <ul>
+                    <li>
+                        {% trans "Aucune catégorie disponible." %}
+                    </li>
+                </ul>
+            {% endfor %}
+        {% endwith %}
+        <div class="mobile-menu-bloc mobile-all-links" data-title="Flux">
+            <h3>{% trans "Flux" %}</h3>
+            <ul>
+                <li>
+                    <a href="{% url "article-feed-rss" %}" class="ico-after rss blue">
+                        {% trans "Nouveaux articles (RSS)" %}
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url "article-feed-atom" %}" class="ico-after rss blue">
+                        {% trans "Nouveaux articles (ATOM)" %}
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </aside>
 {% endblock %}

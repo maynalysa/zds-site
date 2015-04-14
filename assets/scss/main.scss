@@ -1,88 +1,85 @@
-/* ===== Zeste de Savoir ====================================================
-   All styles for *Zeste de Savoir* website
-   ---------------------------------
-   Author: Alex-D / Alexandre Demode
-   ========================================================================== */
-
-
-
-
-
 /**
- * Global vars
+ * Zeste de Savoir
+ * Main style file, imports everything
+ * @file main.scss
  */
-$default-transition-duration: .15s;
 
-//$sprite: sprite-map("../images/sprite.png");
-$sprite2x: url("../images/sprite@2x.png");
-$sprite: $sprite2x;
-
-
-
-/**
- * Colors
- */
-$body-background: #F7F7F7;
-$blue: #084561;
-$orange: #F8AD32;
-$header-hover: #396a81;
-$helpful: #e9f9dc;
-
-$sidebar-background: #F0F0F0;
-$sidebar-hover: #FFF;
-
-$upvote-green: #48a200;
-$downvote-red: #c0392b;
-
-// Margins
-$modal-margin: 25px;
-
-// Font Famillies
-$font-sans-serif: "Segoe UI", "Trebuchet MS", Helvetica, "Helvetica Neue", Arial, sans-serif;
-$font-serif: "Liberation Serif", "Times New Roman", Times, Georgia, FreeSerif, serif;
-$font-monospace: monospace, serif;
-$font-sans-serif-active: "Source Sans Pro", $font-sans-serif;
-$font-serif-active: "Merriweather", $font-serif;
-$font-monospace-active: "Source Code Pro", $font-monospace;
-
-
-
-
-
-/**
- * Import external mixins
- */
-@import "mixins/display-flex";
-@import "mixins/sprite-pos";
-
-/**
- * Import sprite
- */
+@import "variables/variables";
 @import "sprite";
+@import "mixins/display-flex";
 
-/**
- * Import custom styles
- */
-@import "normalize";
-@import "base";
+/*------------------------
+1. Normalize
+------------------------*/
+@import "vendors/normalize";
 
-@import "all-supports";
-@import "form";
-@import "editor";
+/*------------------------
+2. Base
+------------------------*/
+@import "base/base";
+@import "base/tables";
+@import "base/forms";
 
-// Fluid layout
-@import "mobile";
-@import "mobile-tablet";
-@import "tablet";
-@import "wide";
-@import "extra-wide";
-@import "mega-wide";
+/*------------------------
+3. Typography
+------------------------*/
+@import "base/typography";
 
-// Retina-like support
-@import "high-pixel-ratio";
+/*------------------------
+4. Icons
+------------------------*/
+@import "base/icons";
 
-// Dependencies
-@import "pygments";
+/*------------------------
+5. Helpers
+------------------------*/
+@import "base/helpers";
 
-// Disable a lot of styles for print
-@import "print";
+/*------------------------
+6. Header
+------------------------*/
+@import "layout/header";
+@import "components/header-dropdown";
+@import "components/header-search";
+@import "components/accessibility-bar";
+@import "components/cookies-banner";
+
+/*------------------------
+7. Layout
+------------------------*/
+@import "layout/sidebar";
+@import "layout/main";
+@import "layout/content";
+@import "layout/footer";
+
+/*------------------------
+8. Pages
+------------------------*/
+@import "pages/home";
+@import "components/home-search-box";
+@import "pages/gallery";
+@import "pages/api";
+
+/*------------------------
+9. Components
+------------------------*/
+@import "components/alert-box";
+@import "components/authors";
+@import "components/autocomplete";
+@import "components/breadcrumb";
+@import "components/editor";
+@import "components/markdown-help";
+@import "components/mobile-menu";
+@import "components/modals";
+@import "components/pagination";
+@import "components/pygments";
+@import "components/tags";
+@import "components/topic-list";
+@import "components/topic-message";
+@import "components/tutorials-list";
+@import "components/user-profile";
+
+/*-------------------------
+10. High pixel ratio (retina)
+-------------------------*/
+@import "base/high-pixel-ratio";

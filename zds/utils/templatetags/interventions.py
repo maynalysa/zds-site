@@ -4,14 +4,13 @@ from datetime import datetime, timedelta
 import time
 
 from django import template
-from django.db.models import Q, F
+from django.db.models import F
 
-from zds.article.models import never_read as never_read_article, Validation as ArticleValidation, Reaction, Article, ArticleRead
-from zds.forum.models import TopicFollowed, never_read as never_read_topic, Post, Topic, TopicRead
-from zds.mp.models import PrivateTopic, never_privateread, PrivateTopicRead
-from zds.tutorial.models import never_read as never_read_tutorial, Validation as TutoValidation, Note, Tutorial, TutorialRead
+from zds.article.models import Reaction, ArticleRead
+from zds.forum.models import TopicFollowed, never_read as never_read_topic, Post, TopicRead
+from zds.mp.models import PrivateTopic
+from zds.tutorial.models import Note, TutorialRead
 from zds.utils.models import Alert
-import collections
 
 
 register = template.Library()
@@ -24,12 +23,14 @@ def is_read(topic):
     else:
         return True
 
+
 @register.filter('humane_delta')
 def humane_delta(value):
     # mapping between label day and key
-    const = {1:"Aujourd'hui", 2:"Hier", 3:"Cette semaine", 4:"Ce mois-ci", 5: "Cette année"}
+    const = {1: "Aujourd'hui", 2: "Hier", 3: "Cette semaine", 4: "Ce mois-ci", 5: "Cette année"}
 
     return const[value]
+
 
 @register.filter('followed_topics')
 def followed_topics(user):
@@ -44,15 +45,16 @@ def followed_topics(user):
     topics = {}
     for tf in topicsfollowed:
         for p in period:
-            if tf.topic.last_message.pubdate.date() >= (datetime.now() - timedelta(days=int(p[1]),\
-                                                                            hours=0, minutes=0,\
-                                                                            seconds=0)).date():
-                if topics.has_key(p[0]):
+            if tf.topic.last_message.pubdate.date() >= (datetime.now() - timedelta(days=int(p[1]),
+                                                                                   hours=0, minutes=0,
+                                                                                   seconds=0)).date():
+                if p[0] in topics:
                     topics[p[0]].append(tf.topic)
                 else:
-                    topics[p[0]]= [tf.topic]
+                    topics[p[0]] = [tf.topic]
                 break
     return topics
+
 
 def comp(d1, d2):
     v1 = int(time.mktime(d1['pubdate'].timetuple()))
@@ -64,167 +66,114 @@ def comp(d1, d2):
     else:
         return 0
 
+
 @register.filter('interventions_topics')
 def interventions_topics(user):
     topicsfollowed = TopicFollowed.objects.filter(user=user).values("topic").distinct().all()
-    
+
     topics_never_read = TopicRead.objects\
         .filter(user=user)\
-        .filter(topic__in = topicsfollowed)\
+        .filter(topic__in=topicsfollowed)\
         .select_related("topic")\
         .exclude(post=F('topic__last_message'))
 
     articlesfollowed = Reaction.objects\
-    .filter(author=user)\
-    .values('article')\
-    .distinct().all()
+        .filter(author=user, article__sha_public__isnull=False)\
+        .values('article')\
+        .distinct().all()
 
     articles_never_read = ArticleRead.objects\
         .filter(user=user)\
-        .filter(article__in = articlesfollowed)\
+        .filter(article__in=articlesfollowed)\
         .select_related("article")\
         .exclude(reaction=F('article__last_reaction'))
 
     tutorialsfollowed = Note.objects\
-    .filter(author=user)\
-    .values('tutorial')\
-    .distinct().all()
+        .filter(author=user, tutorial__sha_public__isnull=False)\
+        .values('tutorial')\
+        .distinct().all()
 
     tutorials_never_read = TutorialRead.objects\
         .filter(user=user)\
-        .filter(tutorial__in = tutorialsfollowed)\
+        .filter(tutorial__in=tutorialsfollowed)\
         .exclude(note=F('tutorial__last_note'))
-    
+
     posts_unread = []
 
     for art in articles_never_read:
         content = art.article.first_unread_reaction()
-        posts_unread.append({'pubdate':content.pubdate, 'author':content.author, 'title':art.article.title, 'url':content.get_absolute_url()})
-    
+        posts_unread.append({'pubdate': content.pubdate,
+                             'author': content.author,
+                             'title': art.article.title,
+                             'url': content.get_absolute_url()})
+
     for tuto in tutorials_never_read:
         content = tuto.tutorial.first_unread_note()
-        posts_unread.append({'pubdate':content.pubdate, 'author':content.author, 'title':tuto.tutorial.title, 'url':content.get_absolute_url()})
+        posts_unread.append({'pubdate': content.pubdate,
+                             'author': content.author,
+                             'title': tuto.tutorial.title,
+                             'url': content.get_absolute_url()})
 
     for top in topics_never_read:
         content = top.topic.first_unread_post()
         if content is None:
             content = top.topic.last_message
-        posts_unread.append({'pubdate':content.pubdate, 'author':content.author, 'title':top.topic.title, 'url':content.get_absolute_url()})
+        posts_unread.append({'pubdate': content.pubdate,
+                             'author': content.author,
+                             'title': top.topic.title,
+                             'url': content.get_absolute_url()})
 
-    posts_unread.sort(cmp = comp)    
+    posts_unread.sort(cmp=comp)
 
     return posts_unread
 
 
 @register.filter('interventions_privatetopics')
 def interventions_privatetopics(user):
-    
-    topics_never_read = list(PrivateTopicRead.objects\
-        .filter(user=user)\
-        .filter(privatepost=F('privatetopic__last_message')).all())
-    
-    tnrs = []
-    for tnr in topics_never_read:
-        tnrs.append(tnr.privatetopic.pk)
-    
-    privatetopics_unread = PrivateTopic.objects\
-        .filter(Q(author=user) | Q(participants__in=[user]))\
-        .exclude(pk__in=tnrs)\
-        .select_related("privatetopic")\
-        .order_by("-pubdate")\
-        .distinct()
 
-    return {'unread': privatetopics_unread}
+    # Raw query because ORM doesn't seems to allow this kind of "left outer join" clauses.
+    # Parameters = list with 3x the same ID because SQLite backend doesn't allow map parameters.
+    privatetopics_unread = PrivateTopic.objects.raw(
+        '''
+        select distinct t.*
+        from mp_privatetopic t
+        left outer join mp_privatetopic_participants p on p.privatetopic_id = t.id
+        left outer join mp_privatetopicread r on r.user_id = %s and r.privatepost_id = t.last_message_id
+        where (t.author_id = %s or p.user_id = %s)
+          and r.id is null
+        order by t.pubdate desc''',
+        [user.id, user.id, user.id])
 
-
-@register.simple_tag(name='reads_topic')
-def reads_topic(topic, user):
-    if user.is_authenticated():
-        if never_read_topic(topic, user):
-            return ''
-        else:
-            return 'secondary'
-    else:
-        return ''
-
-
-@register.simple_tag(name='reads_article')
-def reads_article(article, user):
-    if user.is_authenticated():
-        if never_read_article(article, user):
-            return ''
-        else:
-            return 'secondary'
-    else:
-        return ''
-
-
-@register.simple_tag(name='reads_tutorial')
-def reads_tutorial(tutorial, user):
-    if user.is_authenticated():
-        if never_read_tutorial(tutorial, user):
-            return ''
-        else:
-            return 'secondary'
-    else:
-        return ''
-
-
-@register.filter(name='alerts_validation_tutos')
-def alerts_validation_tutos(user):
-    tutos = TutoValidation.objects.order_by('-date_proposition').all()
-    total = []
-    for tuto in tutos:
-        if tuto.is_pending():
-            total.append(tuto)
-
-    return {'total': len(total), 'alert': total[:5]}
-
-
-@register.filter(name='alerts_validation_articles')
-def alerts_validation_articles(user):
-    articles = ArticleValidation.objects.order_by('-date_proposition').all()
-    total = []
-    for article in articles:
-        if article.is_pending():
-            total.append(article)
-
-    return {'total': len(total), 'alert': total[:5]}
+    # "total" re-do the query, but there is no other way to get the length as __len__ is not available on raw queries.
+    topics = list(privatetopics_unread)
+    return {'unread': topics, 'total': len(topics)}
 
 
 @register.filter(name='alerts_list')
 def alerts_list(user):
     total = []
-    alerts = Alert.objects.select_related("author").all().order_by('-pubdate')[:10]
+    alerts = Alert.objects.select_related('author', 'comment').all().order_by('-pubdate')[:10]
     for alert in alerts:
         if alert.scope == Alert.FORUM:
-            post = Post.objects.select_related("topic").get(pk=alert.comment.pk)
+            post = Post.objects.select_related('topic').get(pk=alert.comment.pk)
             total.append({'title': post.topic.title,
                           'url': post.get_absolute_url(),
-                          'pubdate': post.pubdate,
+                          'pubdate': alert.pubdate,
                           'author': alert.author,
                           'text': alert.text})
         if alert.scope == Alert.ARTICLE:
-            reaction = Reaction.objects.select_related("article").get(pk=alert.comment.pk)
+            reaction = Reaction.objects.select_related('article').get(pk=alert.comment.pk)
             total.append({'title': reaction.article.title,
                           'url': reaction.get_absolute_url(),
-                          'pubdate': reaction.pubdate,
+                          'pubdate': alert.pubdate,
                           'author': alert.author,
                           'text': alert.text})
         if alert.scope == Alert.TUTORIAL:
-            note = Note.objects.select_related("tutorial").get(pk=alert.comment.pk)
+            note = Note.objects.select_related('tutorial').get(pk=alert.comment.pk)
             total.append({'title': note.tutorial.title,
                           'url': note.get_absolute_url(),
-                          'pubdate': note.pubdate,
+                          'pubdate': alert.pubdate,
                           'author': alert.author,
                           'text': alert.text})
 
     return total
-
-
-@register.filter(name='alerts_count')
-def alerts_count(user):
-    if user.is_authenticated():
-        return Alert.objects.count()
-    else:
-        return 0

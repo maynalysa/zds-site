@@ -3,17 +3,17 @@
 {% load captureas %}
 {% load date %}
 {% load profile %}
-
+{% load i18n %}
 
 
 {% block title_base %}
-    &bull; Forums
+    &bull; {% trans "Forums" %}
 {% endblock %}
 
 
 
 {% block mobile_title %}
-    Forums
+    {% trans "Forums" %}
 {% endblock %}
 
 
@@ -21,7 +21,7 @@
 {% block breadcrumb_base %}
     <li itemscope itemtype="http://data-vocabulary.org/Breadcrumb">
         <a href="{% url "zds.forum.views.index" %}" itemprop="url">
-            <span itemprop="title">Forums</span>
+            <span itemprop="title">{% trans "Forums" %}</span>
         </a>
     </li>
 {% endblock %}
@@ -50,7 +50,7 @@
             {% endcaptureas %}
             {% if sidebaractions %}
                 <div class="mobile-menu-bloc mobile-all-links mobile-show-ico" data-title="Actions">
-                    <h3>Actions</h3>
+                    <h3>{% trans "Actions" %}</h3>
                     <ul>
                         {{ sidebaractions|safe }}
                     </ul>
@@ -62,7 +62,7 @@
 
         {% if user.is_authenticated %}
             <div class="mobile-menu-bloc mobile-all-links" data-title="Sujets suivis">
-                <h3>Sujets suivis</h3>
+                <h3>{% trans "Sujets suivis" %}</h3>
 
                 {% with follwedtopics=user|followed_topics %}
                     {% for period, topics in follwedtopics.items %}
@@ -72,14 +72,14 @@
                                 <li>
                                     <form action="{% url "zds.forum.views.edit" %}" method="post">
                                         <input type="hidden" name="topic" value="{{ topic.pk }}">
-                                        <input type="hidden" name="nb" value="{{ nb }}">
-                                        <input type="hidden" name="page" value="{{ nb }}">
+                                        <input type="hidden" name="nb" value="{% if nb %} {{ nb }} {% else %} {{ zds.settings.ZDS_APP.forum.posts_per_page }} {% endif %}">
+                                        <input type="hidden" name="page" value="{% if page %} {{ page }} {% else %} 1 {% endif %}">
                                         <input type="hidden" name="follow" value="1">
                                         {% csrf_token %}
 
                                         <button class="ico-after cross red stop-follow action-hover" 
                                                 data-title="Ne plus suivre">
-                                            Ne plus suivre
+                                            {% trans "Ne plus suivre" %}
                                         </button>
                                     </form>
                                     
@@ -104,18 +104,18 @@
                                             {% endif %}
                                         "
                                         {% if topic.is_solved or topic.is_locked %}
-                                            data-prefix="
+                                            data-prefix="{% spaceless %}
                                                 {% if topic.is_solved %}
                                                     Résolu
                                                 {% endif %}
                                                 {% if topic.is_locked %}
                                                     Fermé
                                                 {% endif %}
-                                            "
+                                            {% endspaceless %}"
                                         {% endif %}
                                     >
                                         {% if not topic|is_read %}
-                                            <span class="a11y">Non-lu :</span>
+                                            <span class="a11y">{% trans "Non-lu" %} :</span>
                                         {% endif %}
                                         {{ topic.title }}
                                     </a>
@@ -127,14 +127,14 @@
                                                     <img src="{{ profile.get_avatar_url }}" alt="" class="avatar">
                                                 {% endwith %}
                                                 <span class="topic-last-answer">
-                                                    Dernière réponse
+                                                    {% trans "Dernière réponse" %}
                                                     {{ answer.pubdate|format_date:True }}
-                                                    par
+                                                    {% trans "par" %}
                                                     <em>{{ answer.author.username }}</em>
                                                 </span>
                                             {% else %}
                                                 <span class="topic-no-last-answer">
-                                                    Aucune réponse
+                                                    {% trans "Aucune réponse" %}
                                                 </span>
                                             {% endif %}
                                         {% endwith %}
@@ -147,7 +147,7 @@
                     {% if follwedtopics.items|length <= 0 %}
                         <ul>
                             <li class="inactive">
-                                <span class="disabled">Aucun sujet suivi</span>
+                                <span class="disabled">{% trans "Aucun sujet suivi" %}</span>
                             </li>
                         </ul>
                     {% endif %}

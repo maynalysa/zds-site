@@ -3,13 +3,21 @@
 from collections import OrderedDict
 from datetime import datetime
 import os
+
+from git import Repo, Actor
+
+from django.conf import settings
 from django.template import Context
 from django.template.loader import get_template
-from git import *
+from django.utils.translation import ugettext as _
 
 from zds.utils import slugify
+from zds.utils.models import Licence
+
 
 # Export-to-dict functions
+
+
 def export_chapter(chapter, export_all=True):
     from zds.tutorial.models import Extract
     '''
@@ -77,7 +85,7 @@ def export_tutorial(tutorial):
             chapter = Chapter.objects.get(tutorial__pk=tutorial.pk)
             dct['chapter'] = export_chapter(chapter, export_all=False)
         except Chapter.DoesNotExist:
-            chapter = None
+            pass
     else:
         dct['parts'] = []
         parts = Part.objects\
@@ -95,7 +103,7 @@ def get_blob(tree, chemin):
             if os.path.abspath(bl.path) == os.path.abspath(chemin):
                 data = bl.data_stream.read()
                 return data.decode('utf-8')
-        except:
+        except (OSError, IOError):
             return ""
     if len(tree.trees) > 0:
         for tr in tree.trees:
@@ -107,7 +115,7 @@ def get_blob(tree, chemin):
         return None
 
 
-def export_tutorial_to_md(tutorial):
+def export_tutorial_to_md(tutorial, sha=None):
     # Two variables to handle two distinct cases (large/small tutorial)
     chapter = None
     parts = None
@@ -115,14 +123,14 @@ def export_tutorial_to_md(tutorial):
 
     i = open(
         os.path.join(
-            tutorial.get_prod_path(),
+            tutorial.get_prod_path(sha),
             tutorial.introduction),
         "r")
     i_contenu = i.read()
     i.close()
     tuto['intro'] = i_contenu
 
-    c = open(os.path.join(tutorial.get_prod_path(), tutorial.conclusion), "r")
+    c = open(os.path.join(tutorial.get_prod_path(sha), tutorial.conclusion), "r")
     c_contenu = c.read()
     c.close()
     tuto['conclu'] = c_contenu
@@ -138,24 +146,24 @@ def export_tutorial_to_md(tutorial):
     tuto['slug'] = tutorial.slug
 
     # find the good manifest file
-    mandata = tutorial.load_json(online=True)
+    mandata = tutorial.load_json_for_public(sha=sha)
 
     # If it's a small tutorial, fetch its chapter
     if tutorial.type == 'MINI':
         if 'chapter' in mandata:
             chapter = mandata['chapter']
-            chapter['path'] = tutorial.get_prod_path()
+            chapter['path'] = tutorial.get_prod_path(sha)
             chapter['type'] = 'MINI'
             intro = open(
                 os.path.join(
-                    tutorial.get_prod_path(),
+                    tutorial.get_prod_path(sha),
                     mandata['introduction']),
                 "r")
             chapter['intro'] = intro.read()
             intro.close()
             conclu = open(
                 os.path.join(
-                    tutorial.get_prod_path(),
+                    tutorial.get_prod_path(sha),
                     mandata['conclusion']),
                 "r")
             chapter['conclu'] = conclu.read()
@@ -163,10 +171,10 @@ def export_tutorial_to_md(tutorial):
             cpt = 1
             for ext in chapter['extracts']:
                 ext['position_in_chapter'] = cpt
-                ext['path'] = tutorial.get_prod_path()
+                ext['path'] = tutorial.get_prod_path(sha)
                 text = open(
                     os.path.join(
-                        tutorial.get_prod_path(),
+                        tutorial.get_prod_path(sha),
                         ext['text']),
                     "r")
                 ext['txt'] = text.read()
@@ -184,14 +192,14 @@ def export_tutorial_to_md(tutorial):
             part['position_in_tutorial'] = cpt_p
             intro = open(
                 os.path.join(
-                    tutorial.get_prod_path(),
+                    tutorial.get_prod_path(sha),
                     part['introduction']),
                 "r")
             part['intro'] = intro.read()
             intro.close()
             conclu = open(
                 os.path.join(
-                    tutorial.get_prod_path(),
+                    tutorial.get_prod_path(sha),
                     part['conclusion']),
                 "r")
             part['conclu'] = conclu.read()
@@ -207,14 +215,14 @@ def export_tutorial_to_md(tutorial):
                 chapter['position_in_tutorial'] = cpt_c * cpt_p
                 intro = open(
                     os.path.join(
-                        tutorial.get_prod_path(),
+                        tutorial.get_prod_path(sha),
                         chapter['introduction']),
                     "r")
                 chapter['intro'] = intro.read()
                 intro.close()
                 conclu = open(
                     os.path.join(
-                        tutorial.get_prod_path(),
+                        tutorial.get_prod_path(sha),
                         chapter['conclusion']),
                     "r")
                 chapter['conclu'] = conclu.read()
@@ -225,7 +233,7 @@ def export_tutorial_to_md(tutorial):
                     ext['path'] = tutorial.get_path()
                     text = open(
                         os.path.join(
-                            tutorial.get_prod_path(),
+                            tutorial.get_prod_path(sha),
                             ext['text']),
                         "r")
                     ext['txt'] = text.read()
@@ -246,6 +254,23 @@ def export_tutorial_to_md(tutorial):
     return contenu_html
 
 
+def get_sep(msg):
+    """
+    Handle separator for commit msg
+    """
+    if msg is None or msg.strip() == "":
+        return ""
+    else:
+        return ":"
+
+
+def get_text_is_empty(msg):
+    if msg is None or msg.strip() == "":
+        return ""
+    else:
+        return msg
+
+
 def move(obj, new_pos, position_f, parent_f, children_fn):
     """Move an object and reorder other objects affected by moving.
 
@@ -263,10 +288,10 @@ def move(obj, new_pos, position_f, parent_f, children_fn):
     """
     old_pos = getattr(obj, position_f)
     objects = getattr(getattr(obj, parent_f), children_fn)()
-    
+
     # Check that asked new position is correct
     if not 1 <= new_pos <= objects.count():
-        raise ValueError('Can\'t move object to position {0}'.format(new_pos))
+        raise ValueError(_(u"Impossible de déplacer l'objet en position {0}").format(new_pos))
 
     increased_pos = new_pos - old_pos > 0
 
@@ -290,3 +315,205 @@ def move(obj, new_pos, position_f, parent_f, children_fn):
     setattr(obj, position_f, new_pos)
 
 
+def check_json(data, tutorial, zip_file):
+    from zds.tutorial.models import Part, Chapter, Extract
+    if "title" not in data:
+        return False, _(u"Le tutoriel que vous souhaitez importer manque de titre")
+    if "type" not in data:
+        return False, _(u"Les métadonnées du tutoriel à importer ne nous permettent pas de connaître son type")
+    elif tutorial.is_mini():
+        if data["type"] == "BIG":
+            return False, _(u"Vous essayez d'importer un big tutoriel dans un mini tutoriel")
+        elif "chapter" not in data:
+            return False, _(u"La structure de vos métadonnées est incohérente")
+        elif "extracts" not in data["chapter"]:
+            return False, _(u"La structure de vos extraits est incohérente")
+        else:
+            for extract in data["chapter"]["extracts"]:
+                if "pk" not in extract or "title" not in extract or "text" not in extract:
+                    return False, _(u"Un de vos extraits est mal renseigné")
+                elif not Extract.objects.filter(pk=extract["pk"]).exists():
+                    return False, _(u"L'extrait « {} » n'existe pas dans notre base").format(extract["title"])
+                elif not Extract.objects.filter(pk=extract["pk"], chapter__tutorial__pk=tutorial.pk).exists():
+                    return False, _(u"Vous n'êtes pas autorisé à modifier l'extrait « {} »").format(extract["title"])
+                try:
+                    zip_file.getinfo(extract["text"])
+                except KeyError:
+                    return (False,
+                            _(u'Le fichier « {} » renseigné dans vos métadonnées '
+                              u'pour l\'extrait « {} » ne se trouve pas dans votre zip').format(
+                                extract["text"],
+                                extract["title"]))
+        subs = ["introduction", "conclusion"]
+        for sub in subs:
+            if sub in data:
+                try:
+                    zip_file.getinfo(data[sub])
+                except KeyError:
+                    return (False,
+                            _(u'Le fichier « {} » renseigné dans vos métadonnées pour le tutoriel « {} » ne se trouve '
+                              u'pas dans votre zip').format(data[sub], data["title"]))
+    elif tutorial.is_big():
+        if data["type"] == "MINI":
+            return False, _(u"Vous essayez d'importer un mini tutoriel dans un big tutoriel")
+        elif "parts" not in data:
+            return False, _(u"La structure de vos métadonnées est incohérente")
+        else:
+            for part in data["parts"]:
+                if "pk" not in part or "title" not in part:
+                    return False, _(u"La structure de vos parties est incohérente")
+                elif not Part.objects.filter(pk=part["pk"]).exists():
+                    return False, _(u"La partie « {} » n'existe pas dans notre base").format(part["title"])
+                elif not Part.objects.filter(pk=part["pk"], tutorial__pk=tutorial.pk).exists():
+                    return False, _(u"La partie « {} » n'est pas dans le tutoriel à modifier ").format(part["title"])
+                if "chapters" in part:
+                    for chapter in part["chapters"]:
+                        if "pk" not in chapter or "title" not in chapter:
+                            return False, _(u"La structure de vos chapitres est incohérente")
+                        elif not Chapter.objects.filter(pk=chapter["pk"]).exists():
+                            return False, _(u"Le chapitre « {} » n'existe pas dans notre base").format(chapter["title"])
+                        elif not Chapter.objects.filter(pk=chapter["pk"], part__tutorial__pk=tutorial.pk).exists():
+                            return False, _(u"Le chapitre « {} » n'est pas dans le tutoriel a modifier").format(
+                                chapter["title"])
+                        elif "extracts" in chapter:
+                            for extract in chapter["extracts"]:
+                                if "pk" not in extract or "title" not in extract or "text" not in extract:
+                                    return False, _(u"Un de vos extraits est mal renseigné")
+                                elif not Extract.objects.filter(pk=extract["pk"]).exists():
+                                    return False, _(u"L'extrait « {} » n'existe pas dans notre base").format(
+                                        extract["title"])
+                                elif not Extract.objects.filter(pk=extract["pk"],
+                                                                chapter__part__tutorial__pk=tutorial.pk).exists():
+                                    return False, _(u"Vous n'êtes pas autorisé à modifier l'extrait « {} » ").format(
+                                        extract["title"])
+                                try:
+                                    zip_file.getinfo(extract["text"])
+                                except KeyError:
+                                    return (False,
+                                            _(u"Le fichier « {} » renseigné dans vos métadonnées "
+                                              u"pour l\'extrait « {} » ne se trouve pas dans votre zip").
+                                            format(extract["text"], extract["title"]))
+                        subs = ["introduction", "conclusion"]
+                        for sub in subs:
+                            if sub in chapter:
+                                try:
+                                    zip_file.getinfo(chapter[sub])
+                                except KeyError:
+                                    return (False,
+                                            _(u'Le fichier « {} » renseigné dans vos métadonnées '
+                                              u'pour le chapitre « {} » ne se trouve pas dans votre zip').
+                                            format(chapter[sub], chapter["title"]))
+                subs = ["introduction", "conclusion"]
+                for sub in subs:
+                    if sub in part:
+                        try:
+                            zip_file.getinfo(part[sub])
+                        except KeyError:
+                            return (False,
+                                    _(u'Le fichier « {} » renseigné dans vos métadonnées '
+                                      u'pour la partie « {} » ne se trouve pas dans votre zip').format(
+                                          part[sub], part["title"]))
+        subs = ["introduction", "conclusion"]
+        for sub in subs:
+            if sub in data:
+                try:
+                    zip_file.getinfo(data[sub])
+                except KeyError:
+                    return False, _(u'Le fichier « {} » renseigné dans vos métadonnées pour le tutoriel « {} » ne se '
+                                    u'trouve pas dans votre zip').format(data[sub], data["title"])
+    return True, None
+
+
+def import_archive(request):
+    from zds.tutorial.models import Tutorial
+    import zipfile
+    import shutil
+
+    try:
+        import ujson as json_reader
+    except ImportError:
+        try:
+            import simplejson as json_reader
+        except ImportError:
+            import json as json_reader
+
+    archive = request.FILES["file"]
+    tutorial = Tutorial.objects.get(pk=request.POST["tutorial"])
+    ext = str(archive).split(".")[-1]
+    if ext == "zip":
+        zfile = zipfile.ZipFile(archive, "a")
+        json_here = False
+        for i in zfile.namelist():
+            ph = i
+            if ph == "manifest.json":
+                json_data = zfile.read(i)
+                mandata = json_reader.loads(json_data)
+                ck_zip = zipfile.ZipFile(archive, "r")
+                (check, reason) = check_json(mandata, tutorial, ck_zip)
+                if not check:
+                    return check, reason
+                tutorial.title = mandata['title']
+                if "description" in mandata:
+                    tutorial.description = mandata['description']
+                if "introduction" in mandata:
+                    tutorial.introduction = mandata['introduction']
+                if "conclusion" in mandata:
+                    tutorial.conclusion = mandata['conclusion']
+                if "licence" in mandata:
+                    tutorial.licence = Licence.objects.filter(code=mandata["licence"]).all()[0]
+                old_path = tutorial.get_path()
+                tutorial.save()
+                new_path = tutorial.get_path()
+                shutil.move(old_path, new_path)
+                json_here = True
+                break
+        if not json_here:
+            return False, _(u"L'archive n'a pas pu être importée car le "
+                            u"fichier manifest.json (fichier de métadonnées est introuvable).")
+
+        # init git
+        repo = Repo(tutorial.get_path())
+        index = repo.index
+
+        # delete old file
+        for filename in os.listdir(tutorial.get_path()):
+            if not filename.startswith('.'):
+                mf = os.path.join(tutorial.get_path(), filename)
+                if os.path.isfile(mf):
+                    os.remove(mf)
+                elif os.path.isdir(mf):
+                    shutil.rmtree(mf)
+        # copy new file
+        for i in zfile.namelist():
+            ph = i
+            if ph != "":
+                ph_dest = os.path.join(tutorial.get_path(), ph)
+                try:
+                    data = zfile.read(i)
+                    fp = open(ph_dest, "wb")
+                    fp.write(data)
+                    fp.close()
+                    index.add([ph])
+                except IOError:
+                    try:
+                        os.makedirs(ph_dest)
+                    except OSError:
+                        pass
+        zfile.close()
+
+        # save in git
+        msg = _(u"Import du tutoriel")
+        aut_user = str(request.user.pk)
+        aut_email = str(request.user.email)
+        if aut_email is None or aut_email.strip() == "":
+            aut_email = "inconnu@{}".format(settings.ZDS_APP['site']['dns'])
+        com = index.commit(msg.encode("utf-8"),
+                           author=Actor(aut_user, aut_email),
+                           committer=Actor(aut_user, aut_email))
+        tutorial.sha_draft = com.hexsha
+        tutorial.save()
+        tutorial.update_children()
+
+        return True, _(u"Le tutoriel {} a été importé avec succès").format(tutorial.title)
+    else:
+        return False, _(u"L'archive n'a pas pu être importée car elle n'est pas au format zip")

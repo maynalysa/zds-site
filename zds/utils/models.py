@@ -9,6 +9,8 @@ from django.core.urlresolvers import reverse
 from django.utils.encoding import smart_text
 from django.db import models
 from zds.utils import slugify
+from zds.utils.templatetags.emarkdown import emarkdown
+from easy_thumbnails.fields import ThumbnailerImageField
 
 from model_utils.managers import InheritanceManager
 
@@ -20,6 +22,13 @@ def image_path_category(instance, filename):
     return os.path.join('categorie/normal', str(instance.pk), filename)
 
 
+def image_path_help(instance, filename):
+    """Return path to an image."""
+    ext = filename.split('.')[-1]
+    filename = u'{}.{}'.format(str(uuid.uuid4()), string.lower(ext))
+    return os.path.join('helps/normal', str(instance.pk), filename)
+
+
 class Category(models.Model):
 
     """Common category for several concepts of the application."""
@@ -29,6 +38,7 @@ class Category(models.Model):
 
     title = models.CharField('Titre', max_length=80)
     description = models.TextField('Description')
+    position = models.IntegerField('Position', default=0)
 
     slug = models.SlugField(max_length=80)
 
@@ -67,7 +77,7 @@ class Category(models.Model):
             .filter(category__in=[self], is_main=True)\
             .select_related('subcategory')\
             .all()
-        
+
         for catsubcat in catsubcats:
             if catsubcat.subcategory.get_tutos().count() > 0:
                 csc.append(catsubcat)
@@ -187,13 +197,9 @@ class Comment(models.Model):
         max_length=80,
         default='')
 
-    def get_like_count(self):
-        """Gets number of like for the post."""
-        return CommentLike.objects.filter(comments__pk=self.pk).count()
-
-    def get_dislike_count(self):
-        """Gets number of dislike for the post."""
-        return CommentDislike.objects.filter(comments__pk=self.pk).count()
+    def update_content(self, text):
+        self.text = text
+        self.text_html = emarkdown(self.text)
 
 
 class Alert(models.Model):
@@ -275,13 +281,39 @@ class Tag(models.Model):
     def __unicode__(self):
         """Textual Link Form."""
         return u"{0}".format(self.title)
-    
+
     def get_absolute_url(self):
         return reverse('zds.forum.views.find_topic_by_tag',
-           kwargs={'tag_pk': self.pk,
-                   'tag_slug': self.slug})
+                       kwargs={'tag_pk': self.pk,
+                               'tag_slug': self.slug})
 
     def save(self, *args, **kwargs):
         self.title = smart_text(self.title).lower()
         self.slug = slugify(self.title)
         super(Tag, self).save(*args, **kwargs)
+
+
+class HelpWriting(models.Model):
+
+    """Tutorial Help"""
+    class Meta:
+        verbose_name = u'Aide à la rédaction'
+        verbose_name_plural = u'Aides à la rédaction'
+
+    # A name for this help
+    title = models.CharField('Name', max_length=20, null=False)
+    slug = models.SlugField(max_length=20)
+
+    # tablelabel: Used for the accessibility "This tutoriel need help for writing"
+    tablelabel = models.CharField('TableLabel', max_length=150, null=False)
+
+    # The image to use to illustrate this role
+    image = ThumbnailerImageField(upload_to=image_path_help)
+
+    def __unicode__(self):
+        """Textual Help Form."""
+        return self.title
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.title)
+        super(HelpWriting, self).save(*args, **kwargs)

@@ -5,7 +5,7 @@ import os
 from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from zds.gallery.forms import GalleryForm, UserGalleryForm, ImageForm, ImageAsAvatarForm
+from zds.gallery.forms import GalleryForm, UserGalleryForm, ImageForm, ImageAsAvatarForm, ArchiveImageForm
 from zds.member.factories import ProfileFactory
 from zds import settings
 
@@ -67,7 +67,7 @@ class UserGalleryFormTest(TestCase):
 class ImageFormTest(TestCase):
 
     def test_valid_image_form(self):
-        upload_file = open(os.path.join(settings.SITE_ROOT, 'fixtures', 'logo.png'), 'r')
+        upload_file = open(os.path.join(settings.BASE_DIR, 'fixtures', 'logo.png'), 'r')
 
         data = {
             'title': 'Test Image',
@@ -82,8 +82,20 @@ class ImageFormTest(TestCase):
         self.assertTrue(form.is_valid())
         upload_file.close()
 
+    def test_valid_archive_image_form(self):
+        upload_file = open(os.path.join(settings.BASE_DIR, 'fixtures', 'archive-gallery.zip'), 'r')
+
+        data = {}
+        files = {
+            'file': SimpleUploadedFile(upload_file.name, upload_file.read())
+        }
+        form = ArchiveImageForm(data, files)
+
+        self.assertTrue(form.is_valid())
+        upload_file.close()
+
     def test_empty_title_image_form(self):
-        upload_file = open(os.path.join(settings.SITE_ROOT, 'fixtures', 'logo.png'), 'r')
+        upload_file = open(os.path.join(settings.BASE_DIR, 'fixtures', 'logo.png'), 'r')
 
         data = {
             'title': '',
@@ -113,7 +125,7 @@ class ImageFormTest(TestCase):
         self.assertFalse(form.is_valid())
 
     def test_too_big_pic_image_form(self):
-        upload_file = open(os.path.join(settings.SITE_ROOT, 'fixtures', 'image_test.jpg'), 'r')
+        upload_file = open(os.path.join(settings.BASE_DIR, 'fixtures', 'image_test.jpg'), 'r')
 
         data = {
             'title': 'Test Title',
@@ -129,7 +141,7 @@ class ImageFormTest(TestCase):
         upload_file.close()
 
     def test_bot_a_pic_image_form(self):
-        upload_file = open(os.path.join(settings.SITE_ROOT, 'fixtures', 'forums.yaml'), 'r')
+        upload_file = open(os.path.join(settings.BASE_DIR, 'fixtures', 'forums.yaml'), 'r')
 
         data = {
             'title': 'Test Title',
@@ -145,7 +157,7 @@ class ImageFormTest(TestCase):
         upload_file.close()
 
     def test_too_long_title_image_form(self):
-        upload_file = open(os.path.join(settings.SITE_ROOT, 'fixtures', 'logo.png'), 'r')
+        upload_file = open(os.path.join(settings.BASE_DIR, 'fixtures', 'logo.png'), 'r')
 
         data = {
             'title': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam condimentum enim amet.',
@@ -155,11 +167,11 @@ class ImageFormTest(TestCase):
         files = {
             'physical': SimpleUploadedFile(upload_file.name, upload_file.read())
         }
-        form = ImageForm(data, files)
+        ImageForm(data, files)
         upload_file.close()
 
     def test_too_long_legend_image_form(self):
-        upload_file = open(os.path.join(settings.SITE_ROOT, 'fixtures', 'logo.png'), 'r')
+        upload_file = open(os.path.join(settings.BASE_DIR, 'fixtures', 'logo.png'), 'r')
 
         data = {
             'title': 'Test Title',
@@ -169,7 +181,7 @@ class ImageFormTest(TestCase):
         files = {
             'physical': SimpleUploadedFile(upload_file.name, upload_file.read())
         }
-        form = ImageForm(data, files)
+        ImageForm(data, files)
         upload_file.close()
 
 

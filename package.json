@@ -1,15 +1,16 @@
 {
   "name": "zds-site",
   "version": "0.2.0",
-  "description": "Site internet communautaire codé à l'aide du Framework Django 1.6",
+  "description": "Site internet communautaire codé à l'aide du Framework Django 1.7",
   "directories": {
     "doc": "doc"
   },
   "scripts": {
-    "test": "gulp test",
-    "postinstall": "bower install",
-    "postupdate": "bower install",
-    "travis": "gulp travis"
+    "gulp": "./node_modules/.bin/gulp",
+    "test": "./node_modules/.bin/gulp test",
+    "travis": "./node_modules/.bin/gulp travis",
+    "build": "./node_modules/.bin/gulp build",
+    "clean": "./node_modules/.bin/gulp clean"
   },
   "repository": {
     "type": "git",
@@ -21,28 +22,31 @@
   },
   "homepage": "https://github.com/zestedesavoir/zds-site",
   "dependencies": {
+    "browserify": "^8.1.0",
+    "cookies-eu-banner": "1.2.6",
+    "css-sprite": "^0.9.0",
+    "del": "^1.1.1",
     "gulp": "^3.7.0",
-    "gulp-autoprefixer": "0.0.9",
-    "gulp-cache": "^0.2.1",
-    "gulp-clean": "^0.3.0",
-    "gulp-compass": "^1.1.9",
+    "gulp-autoprefixer": "^2.0.0",
     "gulp-concat": "^2.2.0",
-    "gulp-filter": "^1.0.0",
-    "gulp-flatten": "0.0.2",
-    "gulp-imagemin": "^1.0.1",
-    "gulp-jshint": "^1.6.2",
-    "gulp-livereload": "^2.0.0",
-    "gulp-load-plugins": "^0.5.1",
-    "gulp-minify-css": "^0.3.4",
-    "gulp-newer": "^0.3.0",
+    "gulp-if": "^1.2.5",
+    "gulp-imagemin": "^2.0.0",
+    "gulp-load-plugins": "^0.8.0",
+    "gulp-minify-css": "^0.3.11",
+    "gulp-notify": "^2.1.0",
     "gulp-rename": "^1.2.0",
-    "gulp-rimraf": "^0.1.0",
-    "gulp-sass": "^0.7.2",
+    "gulp-sass": "^1.2.3",
     "gulp-size": "^1.0.0",
-    "gulp-uglify": "^0.3.0",
-    "gulp-zip": "^2.0.1",
-    "gulp.spritesmith": "^1.1.0",
-    "jshint-stylish": "^0.4.0",
-    "main-bower-files": "^2.0.0"
+    "gulp-streamify": "0.0.5",
+    "gulp-uglify": "^1.0.1",
+    "jquery": "^2.1.3",
+    "normalize.css": "^3.0.2",
+    "vinyl-source-stream": "^1.0.0",
+    "watchify": "^2.2.1"
+  },
+  "devDependencies": {
+    "gulp-jshint": "^1.6.2",
+    "gulp-livereload": "^3.2.0",
+    "jshint-stylish": "^1.0.0"
   }
 }
