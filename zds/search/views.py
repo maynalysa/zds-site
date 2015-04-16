@@ -1,17 +1,11 @@
 # coding: utf-8
 
-from django.shortcuts import render
-from django.core.urlresolvers import reverse
-
 from haystack.views import SearchView
-
-from zds import settings
 from zds.search.constants import MODEL_NAMES
 from zds.utils.paginator import paginator_range
-
+from zds.utils import render_template
 
 class CustomSearchView(SearchView):
-
     def create_response(self):
         (paginator, page) = self.build_page()
 
@@ -32,15 +26,4 @@ class CustomSearchView(SearchView):
             context['suggestion'] = self.form.get_suggestion()
 
         context.update(self.extra_context())
-        return render(self.request, self.template, context)
-
-
-def opensearch(request):
-    """Generate OpenSearch Description file"""
-
-    return render(request, 'search/opensearch.xml', {
-        'site_name': settings.ZDS_APP['site']['litteral_name'],
-        'site_url': settings.ZDS_APP['site']['url'],
-        'language': settings.LANGUAGE_CODE,
-        'search_url': settings.ZDS_APP['site']['url'] + reverse('haystack_search')
-    }, content_type='application/opensearchdescription+xml')
+        return render_template(self.template, context)

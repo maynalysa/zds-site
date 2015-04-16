@@ -4,11 +4,10 @@
    Author: Alex-D / Alexandre Demode
    ========================================================================== */
 
-(function($, undefined){
+(function($){
     "use strict";
     
-    $("#content [href^=#show-message-hidden]").on("click", function(e){
+    $("[href^=#show-message-hidden]").click(function(){
         $(this).parents(".message:first").find(".message-hidden-content").toggle();
-		e.preventDefault();
     });
 })(jQuery);

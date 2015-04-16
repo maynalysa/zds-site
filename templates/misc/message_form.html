@@ -1,33 +1,9 @@
 {% load crispy_forms_tags %}
-{% load i18n %}
 
 
-{% if topic.is_locked %}
-    <div class="alert-box ico-after lock light">
-        {% trans "Ce sujet est verrouillé" %}.
-    </div>
-{% elif not user.is_authenticated %}
-    <div class="alert-box info alert-box-not-closable">
-        {% trans "Vous devez être connecté pour pouvoir poster un message" %}. <br>
-        <a href="{% url "zds.member.views.login_view" %}?next={{ request.path }}" class="alert-box-btn alert-box-btn-right">Connexion</a>
-    </div>
-    <div class="alert-box not-member alert-box-not-closable">
-        <h4 class="alert-box-title">Pas encore inscrit ?</h4>
-        <p>
-            {% trans "Créez un compte en une minute pour profiter pleinement de toutes les fonctionnalités de Zeste de Savoir. Ici, tout est gratuit et sans publicité" %}. <br>
-            <a href="{% url "register-member" %}" class="alert-box-btn">{% trans "Créer un compte" %}</a>
-        </p>
-    </div>
-{% elif topic.antispam %}
-    <div class="alert-box ico-after light">
-        {% trans "Vous venez de poster. Merci de patienter au moins 15 minutes entre deux messages consécutifs afin de limiter le flood" %}.
-    </div>
-{% elif topic.alone %}
-    <div class="alert-box info cross light">
-        {% trans "Vous êtes seul dans cette conversation" %}.
-    </div>
-{% else %}
-    <section class="topic-message">
+
+<section class="content-wrapper topic-message">
+    {% if user.is_authenticated %}
         <form action="{{ form_action }}" method="post">
             {% include "misc/message_user.html" with hide_metadata=True %}
 
@@ -40,7 +16,17 @@
                         class="md-editor"
                         {% if topic.is_locked or topic.antispam or topic.alone %}disabled{% endif %}
                         placeholder="Votre message au format Markdown"
-                    >{{ text }}</textarea>
+                    >{% spaceless %}
+                        {% if topic.is_locked %}
+                            Ce sujet est verrouillé.
+                        {% elif topic.antispam  %}
+                            Vous venez de poster. Merci de patienter au moins 15 minutes entre deux messages consécutifs afin de limiter le flood.
+                        {% elif topic.alone %}
+                            Vous êtes seul dans cette conversation.
+                        {% else %}
+                            {{ text }}
+                        {% endif %}
+                    {% endspaceless %}</textarea>
                 </div>
 
                 <div class="message-bottom">
@@ -49,10 +35,9 @@
                             type="submit"
                             name="preview"
                             class="btn-grey"
-                            data-ajax-input="preview-message"
                             {% if topic.is_locked or topic.antispam or topic.alone %}disabled{% endif %}
                         >
-                            {% trans "Aperçu" %}
+                            Aperçu
                         </button>
 
                         <button
@@ -60,7 +45,7 @@
                             name="answer"
                             {% if topic.is_locked or topic.antispam or topic.alone %}disabled{% endif %}
                         >
-                            {% trans "Envoyer" %}
+                            Envoyer
                         </button>
                     </div>
                 </div>
@@ -71,5 +56,9 @@
                 {% csrf_token %}
             </div>
         </form>
-    </section>
-{% endif %}
+    {% else %}
+        <p>
+            Vous devez être connecté pour pouvoir poster un message.
+        </p>
+    {% endif %}
+</section>

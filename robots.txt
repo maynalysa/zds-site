@@ -5,5 +5,4 @@ Sitemap: http://zestedesavoir.com/sitemap.xml
 User-agent: *
 Disallow: /mp/
 Disallow: /tutoriels/off/
-Disallow: /tutoriels/beta/
 Disallow: /articles/off/

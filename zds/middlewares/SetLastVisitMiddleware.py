@@ -1,7 +1,6 @@
 import datetime
 from zds.member.views import get_client_ip
 
-
 class SetLastVisitMiddleware(object):
 
     def process_response(self, request, response):

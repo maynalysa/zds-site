@@ -2,18 +2,17 @@
 {% load date %}
 {% load profile %}
 {% load emarkdown %}
-{% load i18n %}
 
 
 
 {% block title %}
-    {% trans "Articles rédigés par" %} {{ usr.username }}
+    Articles rédigés par {{ usr.username }}
 {% endblock %}
 
 
 
 {% block headline %}
-    {% trans "Articles rédigés par" %} {{ usr.username }}
+    Articles rédigés par {{ usr.username }}
 {% endblock %}
 
 
@@ -29,8 +28,8 @@
 
     <li>
         <a href="{% url "zds.article.views.find_article" usr.pk %}">
-            {% trans "Articles rédigés" %}
+            Articles rédigés
         </a>
     </li>
-    <li>{% trans "Liste des articles rédigés par" %} {{ usr.username }}</li>
+    <li>Liste des articles rédigés par {{ usr.username }}</li>
 {% endblock %}

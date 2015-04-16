@@ -1,17 +1,17 @@
 {% extends "tutorial/base.html" %}
 {% load crispy_forms_tags %}
-{% load i18n %}
+
 
 
 {% block title %}
-    {% trans "Nouvelle partie" %}
+    Nouvelle partie
 {% endblock %}
 
 
 
 {% block headline %}
     <h1>
-        {% trans "Nouvelle partie" %}
+        Nouvelle partie
     </h1>
 {% endblock %}
 
@@ -19,7 +19,7 @@
 
 {% block breadcrumb %}
     <li><a href="{{ tutorial.get_absolute_url }}">{{ tutorial.title }}</a></li>
-    <li>{% trans "Nouvelle partie" %}</li>
+    <li>Nouvelle partie</li>
 {% endblock %}
 
 

@@ -1,9 +1,13 @@
 # coding: utf-8
 
 import os
-from zds import settings
 
-smileys_baseURL = os.path.join(settings.STATIC_URL, "smileys")
+
+if __name__ == "__main__":
+    smileys_baseURL = os.path.join("../../../assets", "smileys")
+else:
+    from zds import settings
+    smileys_baseURL = os.path.join(settings.STATIC_URL, "smileys")
 
 smileys_base = {
     "smile.png": (":)", ":-)", ),
@@ -37,3 +41,8 @@ smileys = {}
 for imageFile, symboles in smileys_base.iteritems():
     for symbole in symboles:
         smileys[symbole] = os.path.join(smileys_baseURL, imageFile)
+
+if __name__ == "__main__":
+    for image in smileys.values():
+        if not os.path.isfile(image):
+            print "[" + image + "] is not found !!!"

@@ -6,7 +6,7 @@
 {% load crispy_forms_tags %}
 {% load set %}
 {% load thumbnail %}
-{% load i18n %}
+
 
 {% block title %}
     {{ article.title }}
@@ -52,18 +52,18 @@
 
 
 {% block headline %}
-    {% if article.licence %}
-        <span class="license" itemprop="license">
-            {{ article.licence }}
-        </span>
-    {% endif %}
-
     <h1 {% if article.image %}class="illu"{% endif %} itemprop="name">
         {% if article.image %}
             <img src="{{ article.image.article_illu.url }}" alt="" itemprop="thumbnailUrl">
         {% endif %}
         {{ article.title }}
     </h1>
+    
+    {% if article.licence %}
+        <span class="license" itemprop="license">
+            {{ article.licence }}
+        </span>
+    {% endif %}
 
     {% if article.description %}
         <h2 class="subtitle">
@@ -82,16 +82,14 @@
     </ul>
 
     <span class="pubdate">
-        {% trans "Publié " %}
+        Publié 
         <time datetime="{{ article.pubdate|date:"c" }}" pubdate="pubdate" itemprop="datePublished">
             {{ article.pubdate|format_date }}
         </time>
     </span>
-
-    {% include "misc/zen_button.part.html" %}
-
+    
     <div class="authors">
-        <span class="authors-label">{% trans "Contributeur" %}{{ authors.all|pluralize }} : </span>
+        <span class="authors-label">Contributeur{{ authors.all|pluralize }} : </span>
         <ul>
             {% for member in authors.all %}
                 <li>
@@ -113,10 +111,8 @@
 {% block content %}
     {{ article.txt|safe }}
 
+ 
     {% include "article/includes/pager.part.html" %}
-
-    {% include "article/includes/warn_typo.part.html" with article=article authors=authors%}
-
 {% endblock %}
 
 
@@ -127,9 +123,9 @@
             <span itemprop="commentCount">
                 {{ article.get_reaction_count }}
             </span>
-            {% trans "réaction" %}{{ article.get_reaction_count|pluralize }}
+            réaction{{ article.get_reaction_count|pluralize }}
         {% else %}
-            {% trans "Aucune réaction" %}
+            Aucune réaction
         {% endif %}
     </h3>
 
@@ -176,7 +172,7 @@
     {% include "misc/pagination.part.html" with position="bottom" topic=article is_online=True anchor="reactions" %}
 
 
-
+    
     {% captureas form_action %}
         {% url 'zds.article.views.answer' %}?article={{ article.pk }}
     {% endcaptureas %}
@@ -189,23 +185,21 @@
 {% block sidebar_actions %}
     {% if perms.article.change_article %}
         <div class="mobile-menu-bloc mobile-all-links mobile-show-ico" data-title="Validation">
-            <h3>{% trans "Validation" %}</h3>
+            <h3>Validation</h3>
             <ul>
                 <li>
                     <a href="{{ article.get_absolute_url }}" class="ico-after offline blue">
-                        {% trans "Version hors ligne" %}
+                        Version hors ligne
                     </a>
                 </li>
                 <li>
-                    <a href="#unpublish" class="open-modal ico-after cross blue">{% trans "Dépublier" %}</a>
+                    <a href="#unpublish" class="open-modal ico-after cross blue">Dépublier</a>
                     <form action="{% url "zds.article.views.modify" %}" method="post" class="modal modal-small" id="unpublish">
                         <p>
-                            {% blocktrans %}
-                                <strong>Attention !</strong> Vous allez dépublier un article actuellement <strong>en ligne</strong>.
-                            {% endblocktrans %}
+                            <strong>Attention !</strong> Vous allez dépublier un article actuellement <strong>en ligne</strong>.
                         </p>
                         <button type="submit" name="invalid-article">
-                            {% trans "Confirmer" %}
+                            Confirmer
                         </button>
                         <input type="hidden" name="article" value="{{ article.pk }}">
                         <input type="hidden" name="version" value="{{ version }}">
@@ -214,18 +208,18 @@
                 </li>
                 <li>
                     <a href="{% url "zds.article.views.history_validation" article.pk %}" class="ico-after history blue">
-                        {% trans "Historique de validation" %}
+                        Historique de validation
                     </a>
                 </li>
             </ul>
         </div>
     {% elif user in authors.all %}
         <div class="mobile-menu-bloc mobile-all-links mobile-show-ico" data-title="Gestion">
-            <h3>{% trans "Gestion" %}</h3>
+            <h3>Gestion</h3>
             <ul>
                 <li>
                     <a href="{{ article.get_absolute_url }}" class="ico-after offline blue">
-                        {% trans "Version hors ligne" %}
+                        Version hors ligne
                     </a>
                 </li>
             </ul>
@@ -233,17 +227,15 @@
     {% endif %}
 
     <div class="mobile-menu-bloc mobile-all-links mobile-show-ico" data-title="Télécharger">
-        <h3>{% trans "Télécharger" %}</h3>
+        <h3>Télécharger</h3>
         <ul>
             <li>
                 <a href="{% url "zds.article.views.download" %}?article={{ article.pk }}&online"
                    class="ico-after download blue"
                 >
-                    {% trans "Archive" %}
+                    Archive
                 </a>
             </li>
         </ul>
     </div>
-
-    {% include "misc/social_buttons.part.html" with link=article.get_absolute_url_online text=article.title %}
 {% endblock %}

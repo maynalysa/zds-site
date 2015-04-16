@@ -1,16 +1,15 @@
 {% extends "tutorial/base.html" %}
 {% load crispy_forms_tags %}
-{% load i18n %}
 
 
 
 {% block title %}
-    {% trans "Nouveau chapitre" %}
+    Nouveau chapitre
 {% endblock %}
 
 
 {% block headline %}
-    <h1>{% trans "Nouveau chapitre" %}</h1>
+    <h1>Nouveau chapitre</h1>
 {% endblock %}
 
 
@@ -18,7 +17,7 @@
 {% block breadcrumb %}
     <li><a href="{{ part.tutorial.get_absolute_url }}">{{ part.tutorial.title }}</a></li>
     <li><a href="{{ part.get_absolute_url }}">{{ part.title }}</a></li>
-    <li>{% trans "Nouveau chapitre" %}</li>
+    <li>Nouveau chapitre</li>
 {% endblock %}
 
 

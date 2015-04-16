@@ -5,7 +5,7 @@ from django import template
 from django.contrib.auth.models import User
 
 from zds.member.models import Profile
-from zds.utils.models import CommentLike, CommentDislike
+from zds.utils.models import Comment, CommentLike, CommentDislike
 
 
 register = template.Library()
@@ -29,6 +29,14 @@ def user(pk):
     return user
 
 
+@register.filter('mode')
+def mode(mode):
+    if mode == 'W':
+        return 'pencil'
+    else:
+        return 'eye'
+
+
 @register.filter('state')
 def state(user):
     try:
@@ -50,9 +58,13 @@ def state(user):
 
 @register.filter('liked')
 def liked(user, comment_pk):
-    return CommentLike.objects.filter(comments__pk=comment_pk, user=user).exists()
+    comment = Comment.objects.get(pk=comment_pk)
+    return CommentLike.objects.filter(comments=comment, user=user).count() > 0
 
 
 @register.filter('disliked')
 def disliked(user, comment_pk):
-    return CommentDislike.objects.filter(comments__pk=comment_pk, user=user).exists()
+    comment = Comment.objects.get(pk=comment_pk)
+    return CommentDislike.objects.filter(
+        comments=comment,
+        user=user).count() > 0

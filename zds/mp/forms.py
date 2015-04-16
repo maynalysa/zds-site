@@ -3,26 +3,25 @@
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Field, Hidden
 from django import forms
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from zds.mp.commons import ParticipantsValidator, TitleValidator, TextValidator
 
 from zds.mp.models import PrivateTopic
 from zds.utils.forms import CommonLayoutEditor
-from django.utils.translation import ugettext_lazy as _
 
 
-class PrivateTopicForm(forms.Form, ParticipantsValidator, TitleValidator, TextValidator):
+class PrivateTopicForm(forms.Form):
     participants = forms.CharField(
-        label=_('Participants'),
+        label='Participants',
         widget=forms.TextInput(
             attrs={
-                'placeholder': _(u'Les participants doivent '
-                                 u'être séparés par une virgule.'),
+                'placeholder': u'Les participants doivent '
+                u'être séparés par une virgule.',
                 'required': 'required',
                 'data-autocomplete': '{ "type": "multiple" }'}))
 
     title = forms.CharField(
-        label=_('Titre'),
+        label='Titre',
         max_length=PrivateTopic._meta.get_field('title').max_length,
         widget=forms.TextInput(
             attrs={
@@ -32,16 +31,17 @@ class PrivateTopicForm(forms.Form, ParticipantsValidator, TitleValidator, TextVa
     )
 
     subtitle = forms.CharField(
-        label=_('Sous-titre'),
+        label='Sous-titre',
         max_length=PrivateTopic._meta.get_field('subtitle').max_length,
         required=False
     )
 
     text = forms.CharField(
         label='Texte',
+        required=False,
         widget=forms.Textarea(
             attrs={
-                'placeholder': _('Votre message au format Markdown.'),
+                'placeholder': 'Votre message au format Markdown.',
                 'required': 'required'
             }
         )
@@ -64,14 +64,33 @@ class PrivateTopicForm(forms.Form, ParticipantsValidator, TitleValidator, TextVa
     def clean(self):
         cleaned_data = super(PrivateTopicForm, self).clean()
 
-        self.validate_participants(cleaned_data.get('participants'), self.username)
-        self.validate_title(cleaned_data.get('title'))
-        self.validate_text(cleaned_data.get('text'))
+        participants = cleaned_data.get('participants')
+        title = cleaned_data.get('title')
+        text = cleaned_data.get('text')
+
+        if participants is not None and participants.strip() == '':
+            self._errors['participants'] = self.error_class(
+                [u'Le champ participants ne peut être vide'])
+
+        if participants is not None and participants.strip() != '':
+            receivers = participants.strip().split(',')
+            for receiver in receivers:
+                if User.objects.filter(username__exact=receiver.strip()).count() == 0 and receiver.strip() != '':
+                    self._errors['participants'] = self.error_class(
+                        [u'Un des participants saisi est introuvable'])
+                elif receiver.strip() == self.username:
+                    self._errors['participants'] = self.error_class(
+                        [u'Vous ne pouvez pas vous écrire à vous-même !'])
+
+        if title is not None and title.strip() == '':
+            self._errors['title'] = self.error_class(
+                [u'Le champ titre ne peut être vide'])
+
+        if text is not None and text.strip() == '':
+            self._errors['text'] = self.error_class(
+                [u'Le champ text ne peut être vide'])
 
         return cleaned_data
-
-    def throw_error(self, key=None, message=None):
-        self._errors[key] = self.error_class([message])
 
 
 class PrivatePostForm(forms.Form):
@@ -79,16 +98,17 @@ class PrivatePostForm(forms.Form):
         label='',
         widget=forms.Textarea(
             attrs={
-                'placeholder': _('Votre message au format Markdown.'),
+                'placeholder': 'Votre message au format Markdown.',
                 'required': 'required'
             }
         )
     )
 
-    def __init__(self, topic, *args, **kwargs):
+    def __init__(self, topic, user, *args, **kwargs):
         super(PrivatePostForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.form_action = reverse('private-posts-new', args=[topic.pk, topic.slug()])
+        self.helper.form_action = reverse(
+            'zds.mp.views.answer') + '?sujet=' + str(topic.pk)
         self.helper.form_method = 'post'
 
         self.helper.layout = Layout(
@@ -99,8 +119,8 @@ class PrivatePostForm(forms.Form):
         if topic.alone():
             self.helper['text'].wrap(
                 Field,
-                placeholder=_(u'Vous êtes seul dans cette conversation, '
-                              u'vous ne pouvez plus y écrire.'),
+                placeholder=u'Vous êtes seul dans cette conversation, '
+                u'vous ne pouvez plus y écrire.',
                 disabled=True)
 
     def clean(self):
@@ -110,6 +130,6 @@ class PrivatePostForm(forms.Form):
 
         if text is not None and text.strip() == '':
             self._errors['text'] = self.error_class(
-                [_(u'Le champ text ne peut être vide')])
+                [u'Le champ text ne peut être vide'])
 
         return cleaned_data

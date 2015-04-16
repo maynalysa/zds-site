@@ -16,15 +16,14 @@ base.db
 
 /apache-solr
 
-/.tmp
-
-# Front files
 /node_modules
 /dist
-/npm-debug.log
+/.tmp
+# Générés par Compass
+/assets/images/sprite*.png
+/assets/.sass-css
+/assets/bower_components
 /assets/scss/_sprite.scss
-/assets/scss/vendors
-/assets/js/vendors
 
 #############
 ## Python
@@ -56,9 +55,6 @@ htmlcov/
 
 #Mr Developer
 .mr.developer.cfg
-
-#tox
-.tox/
 
 
 #################
@@ -96,11 +92,6 @@ local.properties
 #############
 .idea/
 
-#############
-## Sphinx
-#############
-
-build/
 
 #############
 ## OS detritus
@@ -118,9 +109,3 @@ $RECYCLE.BIN/
 
 # Mac crap
 .DS_Store
-
-#############
-## Gedit
-#############
-
-*.*~

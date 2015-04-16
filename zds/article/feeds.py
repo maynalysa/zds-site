@@ -4,15 +4,13 @@ from django.contrib.syndication.views import Feed
 
 from django.utils.feedgenerator import Atom1Feed
 
-from django.conf import settings
-
 from .models import Article
 
 
 class LastArticlesFeedRSS(Feed):
-    title = u"Articles sur {}".format(settings.ZDS_APP['site']['litteral_name'])
+    title = "Articles sur Zeste de Savoir"
     link = "/articles/"
-    description = u"Les derniers articles parus sur {}.".format(settings.ZDS_APP['site']['litteral_name'])
+    description = "Les derniers articles parus sur Zeste de Savoir."
 
     def items(self):
         return Article.objects\
@@ -37,7 +35,7 @@ class LastArticlesFeedRSS(Feed):
         return authors
 
     def item_link(self, item):
-        return item.get_absolute_url_online()
+        return item.get_absolute_url()
 
 
 class LastArticlesFeedATOM(LastArticlesFeedRSS):

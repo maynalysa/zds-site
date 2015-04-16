@@ -1,18 +1,17 @@
 {% extends "forum/base.html" %}
 {% load emarkdown %}
 {% load crispy_forms_tags %}
-{% load i18n %}
 
 
 
 {% block title %}
-    {% trans "Nouveau sujet" %}
+    Nouveau sujet
 {% endblock %}
 
 
 
 {% block headline %}
-    {% trans "Nouveau sujet" %}
+    Nouveau sujet
 {% endblock %}
 
 
@@ -28,7 +27,7 @@
             <span itemprop="title">{{ forum.title }}</span>
         </a>
     </li>
-    <li>{% trans "Nouveau sujet" %}</li>
+    <li>Nouveau sujet</li>
 {% endblock %}
 
 

@@ -3,8 +3,11 @@
 from datetime import datetime
 from zds.forum.models import Topic, Post, follow
 from zds.forum.views import get_tag_by_title
+from django.core.mail import EmailMultiAlternatives
+from django.conf import settings
+from django.template import Context
+from django.template.loader import get_template
 from zds.utils.templatetags.emarkdown import emarkdown
-
 
 def create_topic(
         author,
@@ -14,7 +17,7 @@ def create_topic(
         text,
         key):
     """create topic in forum"""
-
+    
     (tags, title_only) = get_tag_by_title(title[:80])
 
     # Creating the thread
@@ -46,27 +49,31 @@ def create_topic(
 
     return n_topic
 
-
 def send_post(topic, text):
-
+    
     post = Post()
     post.topic = topic
     post.author = topic.author
     post.text = text
     post.text_html = emarkdown(text)
     post.pubdate = datetime.now()
-    post.position = topic.last_message.position + 1
+    post.position = topic.last_message.position+1
     post.save()
-
+    
     topic.last_message = post
     topic.save()
-
 
 def lock_topic(topic):
     topic.is_locked = True
     topic.save()
 
-
-def unlock_topic(topic):
+def unlock_topic(topic, msg):
     topic.is_locked = False
+    main = Post.objects.filter(topic__pk=topic.pk, position=1).first()
+    main.text = msg
+    main.text_html = emarkdown(msg)
+    main.editor = topic.author
+    main.update = datetime.now()
+    main.save()
     topic.save()
+    

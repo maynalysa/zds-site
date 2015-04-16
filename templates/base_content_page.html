@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+
 
 
 {% block content_out %}
@@ -7,14 +7,11 @@
         <header>
             {% block headline %}{% endblock %}
         </header>
-        {% block content_page %}
-            <section class="article-content" {% block article_centent_schema %}{% endblock %}>
-                {% block content %}{% endblock %}
-            </section>
-        {% endblock %}
+        <section class="article-content" {% block article_centent_schema %}{% endblock %}>
+            {% block content %}{% endblock %}
+        </section>
         {% block content_after %}{% endblock %}
     </article>
-    {% block content_ext %}{% endblock %}
 {% endblock %}
 
 
