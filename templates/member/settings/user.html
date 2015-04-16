@@ -1,22 +1,23 @@
 {% extends "member/settings/base.html" %}
 {% load crispy_forms_tags %}
-{% load i18n %}
+
 
 
 {% block title %}
-   {% trans "Pseudo et courriel" %}
+   Pseudo et e-mail
 {% endblock %}
 
 
 
 {% block breadcrumb %}
-    <li>{% trans "Pseudo et courriel" %}</li>
+    <li><a href="{% url "zds.member.views.settings_profile" %}">Paramètres</a></li>
+    <li>Pseudo et e-mail</li>
 {% endblock %}
 
 
 
 {% block headline %}
-    {% trans "Pseudo et courriel" %}
+    Pseudo et e-mail
 {% endblock %}
 
 

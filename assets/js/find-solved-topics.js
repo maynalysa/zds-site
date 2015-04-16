@@ -4,7 +4,7 @@
    Author: Alex-D / Alexandre Demode
    ========================================================================== */
 
-(function($, undefined){
+(function($){
     "use strict";
 
     var $solvedTopicsElem = $("main [data-solved-topics-url]");

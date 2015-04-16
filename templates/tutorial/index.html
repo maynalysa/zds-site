@@ -1,13 +1,13 @@
 {% extends "tutorial/base_online.html" %}
 {% load topbar %}
-{% load i18n %}
+
 
 
 {% block title %}
     {% if tag %}
         {{ tag }}
     {% else %}
-        {% trans "Tous les tutoriels" %}
+        Tous les tutoriels
     {% endif %}
 {% endblock %}
 
@@ -15,10 +15,10 @@
 
 {% block description %}
     {% if tag %}
-        {% trans "Découvrez tous nos tutoriels sur" %} {{ tag }}. {% trans "Vous pourrez également découvrir divers sujets tous plus intéressants les uns que les autres" %}.
+        Découvrez tous nos tutoriels sur {{ tag }}. Vous pourrez également découvrir divers sujets tous plus intéressants les uns que les autres.
     {% else %}
-        {% trans "Les tutoriels vous permettent d'apprendre divers sujets tous plus intéressants
-        les uns que les autres" %}.
+        Les tutoriels vous permettent d'apprendre divers sujets tous plus intéressants 
+        les uns que les autres.
     {% endif %}
 {% endblock %}
 
@@ -28,7 +28,7 @@
     {% if tag %}
         <li>{{ tag }}</li>
     {% else %}
-        <li>{% trans "Tous les tutoriels" %}</li>
+        <li>Tous les tutoriels</li>
     {% endif %}
 {% endblock %}
 
@@ -39,13 +39,13 @@
         <h1 class="ico-after ico-tutorials" itemprop="name">
             {% block headline %}
                 {% if tag %}
-                    {% trans "Tutoriels" %} : {{ tag }}
+                    Tutoriels : {{ tag }}
                 {% else %}
-                    {% trans "Tous les tutoriels" %}
+                    Tous les tutoriels
                 {% endif %}
             {% endblock %}
         </h1>
-
+        
         <meta itemprop="itemListOrder" content="Unordered">
 
         {% if tutorials %}
@@ -56,7 +56,7 @@
             </div>
         {% else %}
             <p>
-                {% trans "Aucun tutoriel disponible" %}.
+                Aucun tutoriel disponible.
             </p>
         {% endif %}
     </section>
@@ -69,46 +69,36 @@
            data-title="Catégories de tutoriels"
     >
         <a href="{% url "zds.tutorial.views.add_tutorial" %}" class="new-btn ico-after more blue">
-            {% trans "Nouveau tutoriel" %}
+            Nouveau tutoriel
         </a>
 
-        <a href="{% url "zds.tutorial.views.help_tutorial" %}" class="new-btn ico-after help blue">
-            {% trans "Aider les auteurs" %}
-        </a>
-
-        <h3>{% blocktrans %} Catégories <span class="wide">des tutoriels</span> {% endblocktrans %}</h3>
+        <h3>Catégories <span class="wide">de tutoriels</span></h3>
 
         {% with categories='.'|top_categories_tuto %}
             {% for title, subcats in categories.items %}
                 <h4 class="mobile-menu-link">{{ title }}</h4>
                 <ul>
-                    {% for subcat,slug in subcats %}
+                    {% for subcat in subcats %}
                         <li>
-                            <a href="{% url "zds.tutorial.views.index" %}?tag={{ slug }}" class="mobile-menu-link mobile-menu-sublink">
-                                {{  subcat }}
+                            <a href="{{ subcat.get_absolute_url_tutorial }}" class="mobile-menu-link mobile-menu-sublink">
+                                {{ subcat.title }}
                             </a>
                         </li>
                     {% endfor %}
                 </ul>
-            {% empty %}
-                <ul>
-                    <li>
-                        {% trans "Aucune catégorie disponible." %}
-                    </li>
-                </ul>
             {% endfor %}
         {% endwith %}
         <div class="mobile-menu-bloc mobile-all-links" data-title="Flux">
-            <h3>{% trans "Flux" %}</h3>
+            <h3>Flux</h3>
             <ul>
                 <li>
                     <a href="{% url "tutorial-feed-rss" %}" class="ico-after rss blue">
-                        {% trans "Nouveaux tutoriels (RSS)" %}
+                        Nouveaux tutoriels (RSS)
                     </a>
                 </li>
                 <li>
                     <a href="{% url "tutorial-feed-atom" %}" class="ico-after rss blue">
-                        {% trans "Nouveaux tutoriels (ATOM)" %}
+                        Nouveaux tutoriels (ATOM)
                     </a>
                 </li>
             </ul>

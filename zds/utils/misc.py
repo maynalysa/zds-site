@@ -1,4 +1,8 @@
 # coding: utf-8
+
+import os
+import string
+import uuid
 import hashlib
 
 THUMB_MAX_WIDTH = 80
@@ -6,7 +10,6 @@ THUMB_MAX_HEIGHT = 80
 
 MEDIUM_MAX_WIDTH = 200
 MEDIUM_MAX_HEIGHT = 200
-
 
 def compute_hash(filenames):
     """returns a md5 hexdigest of group of files to check if they have change"""
@@ -22,9 +25,28 @@ def compute_hash(filenames):
                 md5_hash.update(read_bytes)
     return md5_hash.hexdigest()
 
-
 def content_has_changed(filenames, md5):
     return md5 != compute_hash(filenames)
+
+def image_path(instance, filename):
+    """Return path to an image."""
+    ext = filename.split('.')[-1]
+    filename = u'{}.{}'.format(str(uuid.uuid4()), string.lower(ext))
+    return os.path.join('articles', str(instance.pk), filename)
+
+
+def thumb_path(instance, filename):
+    """Return path to an image."""
+    ext = filename.split('.')[-1]
+    filename = u'{}.{}'.format(str(uuid.uuid4()), string.lower(ext))
+    return os.path.join('articles', str(instance.pk), filename)
+
+
+def medium_path(instance, filename):
+    """Return path to an image."""
+    ext = filename.split('.')[-1]
+    filename = u'{}.{}'.format(str(uuid.uuid4()), string.lower(ext))
+    return os.path.join('articles', str(instance.pk), filename)
 
 
 def has_changed(instance, field, manager='objects'):

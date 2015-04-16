@@ -3,8 +3,6 @@
 {% load repo_reader %}
 {% load crispy_forms_tags %}
 {% load thumbnail %}
-{% load roman %}
-{% load i18n %}
 
 
 {% block title %}
@@ -20,18 +18,18 @@
 
 
 {% block headline %}
-    {% if tutorial.licence %}
-        <p class="license">
-            {{ tutorial.licence }}
-        </p>
-    {% endif %}
-
     <h1 {% if tutorial.image %}class="illu"{% endif %}>
         {% if tutorial.image %}
             <img src="{{ tutorial.image.physical.tutorial_illu.url }}" alt="">
         {% endif %}
         {{ tutorial.title }}
     </h1>
+
+    {% if tutorial.licence %}
+        <p class="license">
+            {{ tutorial.licence }}
+        </p>
+    {% endif %}
 
     {% if tutorial.description %}
         <h2 class="subtitle">
@@ -50,22 +48,22 @@
             {% if validation.version == version %}
                 {% if validation.is_pending %}
                     <p class="content-wrapper alert-box alert">
-                        {% trans "Ce tutoriel est en attente d'un validateur" %}
+                        Ce tutoriel est en attente d'un validateur
                     </p>
                 {% elif validation.is_pending_valid %}
                     <p class="content-wrapper alert-box info">
-                        {% trans "Le tutoriel est en cours de validation par" %}
+                        Le tutoriel est en cours de validation par
                         {% include "misc/member_item.part.html" with member=validation.validator %}
                     </p>
                 {% endif %}
                 {% if validation.comment_authors %}
                     <div class="content-wrapper comment-author">
                         <p>
-                            {% trans "Le message suivant a été laissé à destination des validateurs" %} :
+                            Le message suivant a été laissé à destination des validateurs :
                         </p>
 
                         <blockquote>
-                            {{ validation.comment_authors|emarkdown }}
+                            {{ validation.comment_authors }}
                         </blockquote>
                     </div>
                 {% endif %}
@@ -73,14 +71,14 @@
                 {% if validation.is_pending %}
                     <p class="content-wrapper alert-box alert">
                         <a href="{{ tutorial.get_absolute_url }}?version={{ validation.version }}">
-                            {% trans "Une autre version de ce tutoriel" %}</a>
-                        {% trans "est en attente d'un validateur" %}
+                            Une autre version de ce tutoriel</a>
+                        est en attente d'un validateur
                     </p>
                 {% elif validation.is_pending_valid %}
                     <p class="content-wrapper alert-box info">
                         <a href="{{ tutorial.get_absolute_url }}?version={{ validation.version }}">
-                            {% trans "Une autre version de ce tutoriel" %}</a>
-                        {% trans "est en cours de validation par" %}
+                            Une autre version de ce tutoriel</a>
+                        est en cours de validation par
                         {% include "misc/member_item.part.html" with member=validation.validator %}
                     </p>
                 {% endif %}
@@ -91,9 +89,7 @@
     {% if tutorial.is_beta %}
         <div class="content-wrapper">
             <div class="alert-box warning">
-                {% blocktrans %}
-                    Cette version du tutoriel est en <strong>"BÊTA"</strong> !
-                {% endblocktrans %}
+                Cette version du tutoriel est en <strong>BÊTA</strong> !
             </div>
         </div>
     {% endif %}
@@ -101,12 +97,11 @@
 
 
 {% block content %}
-
     {% if tutorial.get_introduction and tutorial.get_introduction != "None" %}
-        {{ tutorial.get_introduction|emarkdown:is_js }}
+        {{ tutorial.get_introduction|emarkdown }}
     {% elif not tutorial.is_beta %}
         <p class="ico-after warning">
-            {% trans "Il n'y a pas d'introduction" %}.
+            Il n'y a pas d'introduction.
         </p>
     {% endif %}
 
@@ -122,13 +117,13 @@
         {% for part in parts %}
             <h2>
                 <a href="{% url "view-part-url" tutorial.pk tutorial.slug part.pk part.slug %}{% if version %}?version={{ version }}{% endif %}">
-                    {{ part.position_in_tutorial|roman }} - {{ part.title }}
+                    Partie {{ part.position_in_tutorial }} : {{ part.title }}
                 </a>
             </h2>
             {% include "tutorial/includes/part.part.html" %}
         {% empty %}
             <p class="ico-after warning">
-                {% trans "Il n'y a actuellement aucune partie dans ce tutoriel" %}.
+                Il n'y a actuellement aucune partie dans ce tutoriel.
             </p>
         {% endfor %}
 
@@ -137,15 +132,11 @@
     {% endif %}
 
     {% if tutorial.get_conclusion and tutorial.get_conclusion != "None" %}
-        {{ tutorial.get_conclusion|emarkdown:is_js }}
+        {{ tutorial.get_conclusion|emarkdown }}
     {% elif not tutorial.is_beta %}
         <p class="ico-after warning">
-            {% trans "Il n'y a pas de conclusion" %}.
+            Il n'y a pas de conclusion.
         </p>
-    {% endif %}
-
-    {% if tutorial.is_beta %}
-        {% include "tutorial/includes/warn_typo.part.html" with obj_type="tutorial" obj_pk=tutorial.pk version_tutorial=tutorial.sha_beta %}
     {% endif %}
 {% endblock %}
 
@@ -153,23 +144,23 @@
 
 {% block sidebar_new %}
     {% if user in tutorial.authors.all or perms.tutorial.change_tutorial %}
-        {% if tutorial.sha_draft == version %}
+        {% if tutorial.sha_draft = version %}
             {% if not tutorial.is_mini %}
                 <a href="{% url "zds.tutorial.views.add_part" %}?tutoriel={{ tutorial.pk }}" class="ico-after more blue new-btn">
-                    {% trans "Ajouter une partie" %}
+                    Ajouter une partie
                 </a>
             {% else %}
                 <a href="{% url "zds.tutorial.views.add_extract" %}?chapitre={{ chapter.pk }}" class="ico-after more blue new-btn">
-                    {% trans "Ajouter un extrait" %}
+                    Ajouter un extrait
                 </a>
             {% endif %}
 
             <a href="{% url "zds.tutorial.views.edit_tutorial" %}?tutoriel={{ tutorial.pk }}" class="ico-after edit blue new-btn">
-                {% trans "Éditer" %}
+                Éditer
             </a>
         {% else %}
             <a href="{{ tutorial.get_absolute_url }}" class="ico-after arrow-right blue new-btn">
-                {% trans "Version brouillon" %}
+                Version brouillon
             </a>
         {% endif %}
     {% endif %}
@@ -181,26 +172,26 @@
     {% if user in tutorial.authors.all or perms.tutorial.change_tutorial %}
         <li>
             <a href="#add-author" class="open-modal ico-after more blue">
-                {% trans "Ajouter un auteur" %}
+                Ajouter un auteur
             </a>
             <form action="{% url "zds.tutorial.views.modify_tutorial" %}" method="post" class="modal modal-small" id="add-author">
                 {% csrf_token %}
                 <input type="text" name="author" placeholder="Pseudo de l'utilisateur à ajouter" data-autocomplete="{ 'type': 'single' }">
                 <input type="hidden" name="tutorial" value="{{ tutorial.pk }}">
                 <button type="submit" name="add_author">
-                    {% trans "Confirmer" %}
+                    Confirmer
                 </button>
             </form>
         </li>
         <li>
             <a href="#manage-authors" class="open-modal ico-after gear blue">
-                {% trans "Gérer les auteurs" %}
+                Gérer les auteurs
             </a>
             <form action="{% url "zds.tutorial.views.modify_tutorial" %}" method="post" class="modal" id="manage-authors" data-modal-close="Fermer">
                 <table class="fullwidth">
                     <thead>
-                        <th>{% trans "Auteur" %}</th>
-                        <th>{% trans "Actions" %}</th>
+                        <th>Auteur</th>
+                        <th>Actions</th>
                     </thead>
                     <tbody>
                         {% for member in tutorial.authors.all %}
@@ -209,10 +200,10 @@
                                 <td>
                                     {% if tutorial.authors.count > 1 %}
                                         <button type="submit" name="author" value="{{ member.pk }}" class="modal-inner">
-                                            {% trans "Supprimer" %}
+                                            Supprimer
                                         </button>
                                     {% else %}
-                                        {% trans "Vous êtes seul" %} !
+                                        Vous êtes seul !
                                     {% endif %}
                                 </td>
                             </tr>
@@ -228,9 +219,7 @@
         {% if tutorial.sha_public %}
             <li>
                 <a href="{{ tutorial.get_absolute_url_online }}" class="ico-after view blue">
-                    {% blocktrans %}
-                        Voir <span class="wide">la version</span> en ligne
-                    {% endblocktrans %}
+                    Voir <span class="wide">la version</span> en ligne
                 </a>
             </li>
         {% endif %}
@@ -238,7 +227,7 @@
         {% if not tutorial.in_beta %}
             <li>
                 <a href="#activ-beta" class="open-modal ico-after beta blue">
-                    {% trans "Mettre cette version en bêta" %}
+                    Mettre cette version en bêta
                 </a>
                 <form action="{% url "zds.tutorial.views.modify_tutorial" %}" method="post" class="modal modal-small" id="activ-beta">
                     {% csrf_token %}
@@ -246,13 +235,11 @@
                     <input type="hidden" name="activ_beta">
                     <input type="hidden" name="version" value="{{ version }}">
                     <p>
-                        {% blocktrans with tutorial_title=tutorial.title %}
-                        Êtes-vous certain de vouloir <strong>activer</strong> la bêta du tutoriel
-                        "<em>{{ tutorial_title }}</em>" dans la version que vous voyez actuellement ?
-                        {% endblocktrans %}
+                        Êtes-vous certain de vouloir <strong>activer</strong> la bêta du tutoriel 
+                        "<em>{{ tutorial.title }}</em>" dans la version que vous voyez actuellement ?
                     </p>
                     <button type="submit">
-                        {% trans "Confirmer" %}
+                        Confirmer
                     </button>
                 </form>
             </li>
@@ -260,14 +247,12 @@
             {% if not tutorial.is_beta %}
                 <li>
                     <a href="{{ tutorial.get_absolute_url }}?version={{ tutorial.sha_beta }}" class="ico-after view blue">
-                        {% blocktrans %}
-                            Voir <span class="wide">la version</span> en bêta
-                        {% endblocktrans %}
+                        Voir <span class="wide">la version</span> en bêta
                     </a>
                 </li>
                 <li>
                     <a href="#update-beta" class="open-modal ico-after beta blue">
-                        {% trans "Mettre à jour la bêta avec cette version" %}
+                        Mettre à jour la bêta avec cette version
                     </a>
                     <form action="{% url "zds.tutorial.views.modify_tutorial" %}" method="post" class="modal modal-small" id="update-beta">
                         {% csrf_token %}
@@ -275,26 +260,24 @@
                         <input type="hidden" name="update_beta">
                         <input type="hidden" name="version" value="{{ version }}">
                         <p>
-                            {% blocktrans with tutorial_title=tutorial.title %}
-                            Êtes-vous certain de vouloir <strong>mettre à jour</strong> la bêta du tutoriel
-                            "<em>{{ tutorial_title }}</em>" dans la version que vous voyez actuellement ?
-                            {% endblocktrans %}
+                            Êtes-vous certain de vouloir <strong>mettre à jour</strong> la bêta du tutoriel 
+                            "<em>{{ tutorial.title }}</em>" dans la version que vous voyez actuellement ?
                         </p>
                         <button type="submit">
-                            {% trans "Confirmer" %}
+                            Confirmer
                         </button>
                     </form>
                 </li>
             {% else %}
                 <li class="inactive">
                     <span class="ico-after beta disabled">
-                        {% trans "Cette version est déjà en bêta" %}
+                        Cette version est déjà en bêta
                     </span>
                 </li>
             {% endif %}
             <li>
                 <a href="#desactiv-beta" class="open-modal ico-after cross blue">
-                    {% trans "Désactiver la bêta" %}
+                    Désactiver la bêta
                 </a>
                 <form action="{% url "zds.tutorial.views.modify_tutorial" %}" method="post" class="modal modal-small" id="desactiv-beta">
                     {% csrf_token %}
@@ -302,12 +285,10 @@
                     <input type="hidden" name="desactiv_beta">
                     <input type="hidden" name="version" value="{{ version }}">
                     <p>
-                        {% blocktrans with tutorial_title=tutorial.title %}
-                            Êtes-vous certain de vouloir <strong>désactiver</strong> la bêta du tutoriel "<em>{{ tutorial_title }}</em>" ?
-                        {% endblocktrans %}
+                        Êtes-vous certain de vouloir <strong>désactiver</strong> la bêta du tutoriel "<em>{{ tutorial.title }}</em>" ?
                     </p>
                     <button type="submit">
-                        {% trans "Confirmer" %}
+                        Confirmer
                     </button>
                 </form>
             </li>
@@ -315,29 +296,29 @@
 
         <li>
             <a href="{% url "zds.tutorial.views.history" tutorial.pk tutorial.slug %}" class="ico-after history blue">
-                {% trans "Historique des versions" %}
+                Historique des versions
             </a>
         </li>
 
         {% if not tutorial.in_validation %}
             <li>
                 <a href="#ask-validation" class="open-modal ico-after tick green">
-                    {% trans "Demander la validation" %}
+                    Demander la validation
                 </a>
             </li>
         {% else %}
             {% if not tutorial.is_validation %}
                 <li>
                     <a href="#ask-validation" class="open-modal ico-after tick green">
-                        {% trans "Mettre à jour la version en validation" %}
+                        Mettre à jour la version en validation
                     </a>
                 </li>
             {% endif %}
             <li class="inactive">
-                <span class="ico-after tick disabled">{% trans "En attente de validation" %}</span>
+                <span class="ico-after tick disabled">En attente de validation</span>
             </li>
         {% endif %}
-        <div id="ask-validation" class="modal modal-big">
+        <div id="ask-validation" class="modal modal-medium">
             {% crispy formAskValidation %}
         </div>
     {% endif %}
@@ -348,52 +329,36 @@
 {% block sidebar_blocks %}
     {% if perms.tutorial.change_tutorial %}
         <div class="mobile-menu-bloc mobile-all-links mobile-show-ico" data-title="Validation">
-            <h3>{% trans "Validation" %}</h3>
+            <h3>Validation</h3>
             <ul>
                 <li>
                     <a href="{% url "zds.tutorial.views.history_validation" tutorial.pk %}" class="ico-after history blue">
-                        {% trans "Historique validation" %}
+                        Historique validation
                     </a>
                 </li>
                 <li>
-                    <a  href="{% url 'mp-new' %}?{% for username in tutorial.authors.all %}&amp;username={{ username }}{% endfor %}"
+                    <a  href="{% url "zds.mp.views.new" %}?{% for username in tutorial.authors.all %}&amp;username={{ username }}{% endfor %}"
                         class="ico-after cite blue"
                     >
-                        {% trans "Envoyer un MP" %}
+                        Envoyer un MP 
                         {% if tutorial.authors.all|length > 1 %}
-                            {% trans "aux auteurs" %}
+                            aux auteurs
                         {% else %}
-                            à {% trans "l'auteur" %}
+                            à l'auteur
                         {% endif %}
                     </a>
                 </li>
-                <li>
-                    {% if is_js %}
-                        <a href="#js-activation" class="open-modal ico-after cross red">
-                            {% trans "Désactiver JSFiddle" %}
-                        </a>
-                    {% else %}
-                        <a href="#js-activation" class="open-modal ico-after tick green">
-                            {% trans "Activer JSFiddle" %}
-                        </a>
-                    {% endif %}
-                </li>
-                <div id="js-activation" class="modal modal-small">
-                    {% crispy formJs %}
-                </div>
 
                 {% if tutorial.on_line %}
                     <li>
-                        <a href="#unpublish" class="ico-after open-modal cross blue">{% trans "Dépublier" %}</a>
+                        <a href="#unpublish" class="ico-after open-modal cross blue">Dépublier</a>
                         <form action="{% url "zds.tutorial.views.invalid_tutorial" tutorial.pk %}" method="post" class="modal modal-small" id="unpublish">
                         	{% csrf_token %}
                             <p>
-                                {% blocktrans with tutorial_title=tutorial.title %}
-                                    Êtes-vous certains de vouloir <strong>dépublier</strong> le tutoriel "<em>{{ tutorial_title }}</em>"
-                                {% endblocktrans %}
+                                Êtes-vous certains de vouloir <strong>dépublier</strong> le tutoriel "<em>{{ tutorial.title }}</em>"
                             </p>
                             <button type="submit">
-                                {% trans "Confirmer" %}
+                                Confirmer
                             </button>
                         </form>
                     </li>
@@ -405,46 +370,44 @@
                             <form action="{% url "zds.tutorial.views.reservation" validation.pk %}" method="post">
                                 {% csrf_token %}
                                 <button type="submit" class="ico-after lock blue">
-                                    {% trans "Réserver" %}
+                                    Réserver
                                 </button>
                             </form>
                         </li>
                     {% elif validation.is_pending_valid %}
-                        {% if validation.validator == user %}
+                        {% if validation.validator = user %}
                             <li>
                                 <form action="{% url "zds.tutorial.views.reservation" validation.pk %}" method="post">
                                     {% csrf_token %}
                                     <button type="submit" class="ico-after lock blue">
-                                        {% trans "Annuler la réservation" %}
+                                        Annuler la réservation
                                     </button>
                                 </form>
                             </li>
                             <li>
-                                <a href="#valid-publish" class="open-modal ico-after tick green">{% trans "Valider et publier" %}</a>
+                                <a href="#valid-publish" class="open-modal ico-after tick green">Valider et publier</a>
                                 <div class="modal modal-big" id="valid-publish">
                                     {% crispy formValid %}
                                 </div>
                             </li>
                             <li>
-                                <a href="#reject" class="open-modal ico-after cross red">{% trans "Rejeter" %}</a>
-                                <div class="modal modal-big" id="reject">
+                                <a href="#reject" class="open-modal ico-after cross red">Rejeter</a>
+                                <div class="modal modal-small" id="reject">
                                     {% crispy formReject %}
                                 </div>
                             </li>
                         {% else %}
                             <li>
                                 <a href="#unreservation" class="open-modal ico-after lock blue">
-                                    {% blocktrans with validator_name=validation.validator.username %}
-                                        Réservé par <strong>{{ validator_name }}</strong>, le retirer
-                                    {% endblocktrans %}
+                                    Réservé par <strong>{{ validation.validator.username }}</strong>, le retirer
                                 </a>
                                 <form action="{% url "zds.tutorial.views.reservation" validation.pk %}" method="post" class="modal modal-small" id="unreservation">
                                     {% csrf_token %}
                                     <p>
-                                        {% trans "La validation de ce tutoriel est actuellement réservée par" %} {% include "misc/member_item.part.html" with member=validation.validator %}. {% trans "Êtes-vous certain de vouloir le retirer" %} ?
+                                        La validation de ce tutoriel est actuellement réservé par {% include "misc/member_item.part.html" with member=validation.validator %}. Êtes-vous certains de vouloir le retirer ?
                                     </p>
                                     <button type="submit">
-                                        {% trans "Confirmer" %}
+                                        Confirmer
                                     </button>
                                 </form>
                             </li>
@@ -459,29 +422,27 @@
 
     {% if user in tutorial.authors.all or perms.tutorial.change_tutorial %}
          <div class="mobile-menu-bloc mobile-all-links mobile-show-ico" data-title="Suppression">
-            <h3>{% trans "Suppression" %}</h3>
+            <h3>Suppression</h3>
             <ul>
                 {% if not tutorial.on_line %}
                     <li>
                         <a href="#delete-tutorial" class="open-modal ico-after cross red">
-                            {% trans "Supprimer le tutoriel" %}
+                            Supprimer le tutoriel
                         </a>
                         <form action="{% url "zds.tutorial.views.delete_tutorial" tutorial.pk %}" method="post" id="delete-tutorial" class="modal modal-medium">
                         	{% csrf_token %}
                             <p>
-                                {% blocktrans with tutorial_title=tutorial.title %}
-                                    Attention, vous vous apprêtez à <strong>supprimer définitivement</strong> le tutoriel "<em>{{ tutorial_title }}</em>".
-                                {% endblocktrans %}
+                                Attention, vous vous apprêtez à <strong>supprimer définitivement</strong> le tutoriel "<em>{{ tutorial.title }}</em>".
                             </p>
                             <button type="submit">
-                                {% trans "Confirmer" %}
+                                Confirmer
                             </button>
                         </form>
                     </li>
                 {% else %}
                     <li class="inactive">
                         <span class="ico-after cross disabled">
-                            {% trans "Impossible, car publié" %}
+                            Impossible, car publié
                         </span>
                     </li>
                 {% endif %}

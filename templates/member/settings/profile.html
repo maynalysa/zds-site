@@ -1,22 +1,23 @@
 {% extends "member/settings/base.html" %}
 {% load crispy_forms_tags %}
-{% load i18n %}
+
 
 
 {% block title %}
-   {% trans "Mon profil" %}
+   Mon profil
 {% endblock %}
 
 
 
 {% block breadcrumb %}
-    <li>{% trans "Mon profil" %}</li>
+    <li><a href="{% url "zds.member.views.settings_profile" %}">Paramètres</a></li>
+    <li>Mon profil</li>
 {% endblock %}
 
 
 
 {% block headline %}
-    {% trans "Mon profil" %}
+    Mon profil
 {% endblock %}
 
 

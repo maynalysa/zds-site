@@ -1,68 +1,54 @@
 {% extends "article/index.html" %}
-{% load i18n %}
+
 
 
 {% block title_base %}
-    &bull; {% trans "Articles" %}
+    &bull; Articles
 {% endblock %}
 
 
 
 {% block breadcrumb_base %}
-    <li><a href="{% url "zds.member.views.articles" %}">{% trans "Mes articles" %}</a></li>
+    <li><a href="{% url "zds.member.views.articles" %}">Mes articles</a></li>
 {% endblock %}
 
 
 
 {% block breadcrumb %}
     {% if request.GET.type == "public" %}
-        <li>{% trans "Publiés" %}</li>
+        <li>Publiés</li>
     {% elif request.GET.type == "validate" %}
-        <li>{% trans "En validation" %}</li>
+        <li>En validation</li>
     {% elif request.GET.type == "draft" %}
-        <li>{% trans "Brouillons" %}</li>
+        <li>Brouillons</li>
     {% else %}
-        <li>{% trans "Tous mes articles" %}</li>
+        <li>Tous mes articles</li>
     {% endif %}
 {% endblock %}
 
 
 
 {% block title %}
-    {% trans "Mes Articles" %}
+    Mes Articles
     {% if request.GET.type == "public" %}
-        / {% trans "Publiés" %}
+        / Publiés
     {% elif request.GET.type == "validate" %}
-        / {% trans "En validation" %}
+        / En validation
     {% elif request.GET.type == "draft" %}
-        / {% trans "Brouillons" %}
-    {% endif %}
-    {% if sort == "abc" %}
-        / Par ordre alphabétique
-    {% elif sort == "creation" %}
-        / Par date de création
-    {% elif sort == "modification" %}
-        / Par date de dernière modification
+        / Brouillons
     {% endif %}
 {% endblock %}
 
 
 
 {% block headline %}
-    {% trans "Mes Articles" %}
+    Mes Articles
     {% if request.GET.type == "public" %}
-        / {% trans "Publiés" %}
+        / Publiés
     {% elif request.GET.type == "validate" %}
-        / {% trans "En validation" %}
+        / En validation
     {% elif request.GET.type == "draft" %}
-        / {% trans "Brouillons" %}
-    {% endif %}
-    {% if sort == "abc" %}
-        / Par ordre alphabétique
-    {% elif sort == "creation" %}
-        / Par date de création
-    {% elif sort == "modification" %}
-        / Par date de dernière modification
+        / Brouillons
     {% endif %}
 {% endblock %}
 
@@ -71,54 +57,34 @@
 {% block sidebar %}
     <aside class="sidebar mobile-menu-hide">
         <a href="{% url "zds.article.views.new" %}" class="ico-after more blue new-btn">
-            {% trans "Nouvel article" %}
+            Nouvel article
         </a>
 
         <div class="mobile-menu-bloc mobile-all-links" data-title="Filtres">
-            <h3>{% trans "Filtres" %}</h3>
+            <h3>Filtres</h3>
             <ul>
                 <li>
-                    <a href="{% url "zds.member.views.articles" %}?{% if sort %}sort={{ sort }}&{% endif %}type=public" class="ico-after tick green {% if request.GET.type == "public" %}selected{% endif %}">
-                        {% trans "Publiés" %}
+                    <a href="{% url "zds.member.views.articles" %}?type=public" class="ico-after tick green {% if request.GET.type == "public" %}unread{% endif %}">
+                        Publiés
                     </a>
                 </li>
                 <li>
-                    <a href="{% url "zds.member.views.articles" %}?{% if sort %}sort={{ sort }}&{% endif %}type=validate" class="ico-after tick {% if request.GET.type == "validate" %}selected{% endif %}">
-                        {% trans "En validation" %}
+                    <a href="{% url "zds.member.views.articles" %}?type=validate" class="ico-after tick {% if request.GET.type == "validate" %}unread{% endif %}">
+                        En validation
                     </a>
                 </li>
                 <li>
-                    <a href="{% url "zds.member.views.articles" %}?{% if sort %}sort={{ sort }}&{% endif %}type=draft" class="ico-after edit {% if request.GET.type == "draft" %}selected{% endif %}">
-                        {% trans "Brouillons" %}
+                    <a href="{% url "zds.member.views.articles" %}?type=draft" class="ico-after edit {% if request.GET.type == "draft" %}unread{% endif %}">
+                        Brouillons
                     </a>
                 </li>
                 {% if request.GET.type %}
                     <li>
-                        <a href="{% url "zds.member.views.articles" %}{% if sort %}?sort={{ sort }}{% endif %}" class="ico-after cross">
-                            {% trans "Annuler le filtre" %}
+                        <a href="{% url "zds.member.views.articles" %}" class="ico-after cross">
+                            Annuler le filtre
                         </a>
                     </li>
                 {% endif %}
-            </ul>
-        </div>
-        <div class="mobile-menu-bloc mobile-all-links" data-title="Trier">
-            <h3>Trier</h3>
-            <ul>
-                <li>
-                    <a href="{% url "zds.member.views.articles" %}?sort=abc{% if type %}&type={{ type }}{% endif %}" class="ico-after gear {% if sort == "abc" %}selected{% endif %}">
-                        Par ordre alphabétique
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url "zds.member.views.articles" %}?sort=creation{% if type %}&type={{ type }}{% endif %}" class="ico-after gear {% if sort == "creation" %}selected{% endif %}">
-                        Par date de création
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url "zds.member.views.articles" %}?sort=modification{% if type %}&type={{ type }}{% endif %}" class="ico-after gear {% if sort == "modification" %}selected{% endif %}">
-                        Par date de dernière modification
-                    </a>
-                </li>
             </ul>
         </div>
     </aside>
@@ -135,7 +101,7 @@
         </div>
     {% else %}
         <p>
-            {% trans "Aucun article disponible" %}.
+            Aucun article disponible.
         </p>
     {% endif %}
 {% endblock %}

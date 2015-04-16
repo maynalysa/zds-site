@@ -1,25 +1,24 @@
 {% extends "mp/base.html" %}
 {% load crispy_forms_tags %}
 {% load captureas %}
-{% load i18n %}
 
 
 
 {% block title %}
-    {% trans "Répondre au MP" %}
+    Répondre au MP
 {% endblock %}
 
 
 
 {% block breadcrumb %}
     <li><a href="{{ topic.get_absolute_url }}">{{ topic.title }}</a></li>
-    <li>{% trans "Répondre au MP" %}</li>
+    <li>Répondre au MP</li>
 {% endblock %}
 
 
 
 {% block headline %}
-    {% trans "Répondre au MP" %} : {{topic.title}}
+    Répondre au MP : {{topic.title}}
 {% endblock %}
 
 
@@ -33,15 +32,13 @@
 {% block content %}
     {% if newpost %}
         <div class="alert-box alert">
-            {% blocktrans %}
             <strong>Au moins un nouveau message a été posté</strong> dans la discussion
             pendant que vous rédigiez le votre.
-            {% endblocktrans %}
         </div>
     {% endif %}
 
     {% captureas form_action %}
-        {% url "private-posts-new" topic.pk topic.slug %}
+        {% url "zds.mp.views.answer" %}?sujet={{ topic.pk }}
     {% endcaptureas %}
 
     {% include "misc/message_form.html" with member=user text=form.text.value %}
@@ -55,11 +52,11 @@
     <div class="content-wrapper">
         {% for message in posts %}
             {% captureas edit_link %}
-                {% url "private-posts-edit" topic.pk topic.slug message.pk %}
+                {% url "zds.mp.views.edit_post" %}?message={{ message.pk }}
             {% endcaptureas %}
 
             {% captureas cite_link %}
-                {% url "private-posts-new" topic.pk topic.slug %}?cite={{ message.pk }}
+                {% url "zds.mp.views.answer" %}?sujet={{ topic.pk }}&amp;cite={{ message.pk }}
             {% endcaptureas %}
 
             {% include "misc/message.part.html" %}

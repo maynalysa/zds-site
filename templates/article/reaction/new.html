@@ -1,24 +1,24 @@
 {% extends "article/base.html" %}
 {% load crispy_forms_tags %}
 {% load captureas %}
-{% load i18n %}
+
 
 
 {% block title %}
-    {% trans "Répondre à l'article" %}
+    Répondre à l'article
 {% endblock %}
 
 
 
 {% block breadcrumb %}
-    <li><a href="{{ article.get_absolute_url_online }}">{{ article.title }}</a></li>
-    <li>{% trans "Répondre à l'article" %}</li>
+    <li><a href="{{ article.get_absolute_online_url }}">{{ article.title }}</a></li>
+    <li>Répondre à l'article</li>
 {% endblock %}
 
 
 
 {% block headline %}
-    {% trans "Répondre à l'article" %} : {{ article.title }}
+    Répondre à l'article : {{ article.title }}
 {% endblock %}
 
 
@@ -26,10 +26,8 @@
 {% block content %}
     {% if newreaction %}
         <div class="alert-box alert">
-            {% blocktrans %}
-                <strong>Au moins un nouveau message a été posté</strong> dans la discussion
+            <strong>Au moins un nouveau message a été posté</strong> dans la discussion
             pendant que vous rédigiez le votre.
-            {% endblocktrans %}
         </div>
     {% endif %}
 
@@ -46,7 +44,7 @@
             {% endcaptureas %}
 
             {% captureas cite_link %}
-                {% url "zds.article.views.answer" %}?article={{ article.pk }}&amp;cite={{ message.pk }}
+                {% url "zds.article.views.answer" %}?article={{ topic.pk }}&amp;cite={{ message.pk }}
             {% endcaptureas %}
 
             {% captureas upvote_link %}

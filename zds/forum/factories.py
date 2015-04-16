@@ -4,7 +4,6 @@ import factory
 from zds.forum.models import Category, Forum, Topic, Post
 from zds.utils.models import Tag
 
-
 class CategoryFactory(factory.DjangoModelFactory):
     FACTORY_FOR = Category
 
@@ -20,13 +19,11 @@ class ForumFactory(factory.DjangoModelFactory):
         lambda n: 'Sous Titre du Forum No{0}'.format(n))
     slug = factory.Sequence(lambda n: 'forum{0}'.format(n))
 
-
 class TagFactory(factory.DjangoModelFactory):
     FACTORY_FOR = Tag
-
+    
     title = factory.Sequence(lambda n: 'Tag{0}'.format(n))
     slug = factory.Sequence(lambda n: 'tag{0}'.format(n))
-
 
 class TopicFactory(factory.DjangoModelFactory):
     FACTORY_FOR = Topic
@@ -47,7 +44,6 @@ class PostFactory(factory.DjangoModelFactory):
         post = super(PostFactory, cls)._prepare(create, **kwargs)
         topic = kwargs.pop('topic', None)
         if topic:
-            post.save()
             topic.last_message = post
             topic.save()
         return post

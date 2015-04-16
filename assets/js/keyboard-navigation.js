@@ -4,61 +4,53 @@
    Author: Alex-D / Alexandre Demode
    ========================================================================== */
 
-(function(document, $, undefined){
+(function($){
     "use strict";
     
-    $(document).ready(function(){
-        var $lists = $("#content .navigable-list");
+    var $list = $(".navigable-list");
 
-        if($lists.length > 0){
-            var $navigableElems = $lists.find(".navigable-elem");
+    if($list.length > 0){
+        var $navigableElems = $list.find(".navigable-elem");
+        $("body").on("keydown", function(e){
+            if(!$(document.activeElement).is(":input") && (e.which === 74 || e.which === 75)){
+                var $current = $list.find(".navigable-elem.active"),
+                    nextIndex = null;
 
-            $("body").on("keydown", function(e){
-                if(!$(document.activeElement).is(":input") && (e.which === 74 || e.which === 75)){
-                    var $current = $lists.find(".navigable-elem.active"),
-                        nextIndex = null;
-
-                    if($current.length === 1){
-                        var currentIndex = $navigableElems.index($current);
-                        if(e.which === 75){ // J
-                            if(currentIndex > 0)
-                                nextIndex = currentIndex - 1;
-                        } else { // K
-                            if(currentIndex + 1 < $navigableElems.length)
-                                nextIndex = currentIndex + 1;
-                        }
-                    } else {
-                        nextIndex = 0;
+                if($current.length === 1){
+                    var currentIndex = $navigableElems.index($current);
+                    if(e.which === 75){ // J
+                        if(currentIndex > 0)
+                            nextIndex = currentIndex - 1;
+                    } else { // K
+                        if(currentIndex + 1 < $navigableElems.length)
+                            nextIndex = currentIndex + 1;
                     }
-
-                    if(nextIndex !== null){
-                        $current.removeClass("active");
-                        activeNavigableElem($navigableElems.eq(nextIndex));
-                    }
+                } else {
+                    nextIndex = 0;
                 }
-            });
 
-            $("#content .navigable-list")
-            .on("focus", ".navigable-link", function(){
-                if(!$(this).parents(".navigable-elem:first").hasClass("active")){
-                    $lists.find(".navigable-elem.active").removeClass("active");
-                    activeNavigableElem($(this).parents(".navigable-elem"));
+                if(nextIndex !== null){
+                    $current.removeClass("active");
+                    activeNavigableElem($navigableElems.eq(nextIndex));
                 }
-            })
-            .on("blur", ".navigable-link", function(){
-                $(this).parents(".navigable-elem:first").removeClass("active");
-            });
-        }
-
-        function activeNavigableElem($elem){
-            $elem
-                .addClass("active")
-                .find(".navigable-link")
-                    .focus();
-        }
-
-        $("#content").on("DOMNodeInserted", ".navigable-list, .navigable-elem", function(){
-            $lists = $("#content .navigable-list");
+            }
         });
-    });
-})(document, jQuery);
+
+        $list.find(".navigable-link").on("focus", function(){
+            if(!$(this).parents(".navigable-elem:first").hasClass("active")){
+                $list.find(".navigable-elem.active").removeClass("active");
+                activeNavigableElem($(this).parents(".navigable-elem"));
+            }
+        });
+        $list.find(".navigable-link").on("blur", function(){
+            $(this).parents(".navigable-elem:first").removeClass("active");
+        });
+    }
+
+    function activeNavigableElem($elem){
+        $elem
+            .addClass("active")
+            .find(".navigable-link")
+                .focus();
+    }
+})(jQuery);

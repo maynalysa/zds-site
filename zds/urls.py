@@ -55,14 +55,12 @@ sitemaps = {
         priority=0.7
     ),
     'forums': GenericSitemap(
-        {'queryset': Forum.objects.filter(group__isnull=True).exclude(pk=settings.ZDS_APP['forum']['beta_forum_id'])},
+        {'queryset': Forum.objects.filter(group__isnull=True)},
         changefreq='yearly',
         priority=0.7
     ),
     'topics': GenericSitemap(
-        {'queryset': Topic.objects.filter(is_locked=False,
-                                          forum__group__isnull=True).exclude(forum__pk=settings.ZDS_APP['forum']['beta_forum_id']),
-         'date_field': 'pubdate'},
+        {'queryset': Topic.objects.filter(is_locked=False, forum__group__isnull=True), 'date_field': 'pubdate'},
         changefreq='hourly',
         priority=0.7
     ),
@@ -83,20 +81,14 @@ urlpatterns = patterns('',
                        url(r'^galerie/', include('zds.gallery.urls')),
                        url(r'^rechercher/', include('zds.search.urls')),
                        url(r'^munin/', include('zds.munin.urls')),
-                       url('', include('social.apps.django_app.urls', namespace='social')),
-                       url('', include('django.contrib.auth.urls', namespace='auth')),
+
+                       url(r'^captcha/', include('captcha.urls')),
+
                        ('^munin/', include('munin.urls')),
 
                        url(r'^$', 'zds.pages.views.home'),
 
                        ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-# API
-urlpatterns += patterns('',
-                        url(r'^api/', include('rest_framework_swagger.urls')),
-                        url(r'^oauth2/', include('oauth2_provider.urls', namespace='oauth2_provider')),
-                        url(r'^api/membres/', include('zds.member.api.urls')),
-                        )
 
 # SiteMap URLs
 urlpatterns += patterns('django.contrib.sitemaps.views',
@@ -117,6 +109,3 @@ if settings.SERVE:
                                 'django.views.static.serve',
                                 {'document_root': settings.MEDIA_ROOT}),
                             )
-
-# custom view for 500 errors
-handler500 = "zds.pages.views.custom_error_500"

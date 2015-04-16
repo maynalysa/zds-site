@@ -4,29 +4,23 @@
    Author: Alex-D / Alexandre Demode
    ========================================================================== */
 
-(function($, undefined){
+(function($){
     "use strict";
     
-    var mouseDown = false,
-        shiftHold = false;
-
-    $(document).on("keydown keyup", function(e){
-        shiftHold = e.shiftKey;
-    });
+    var dropdownMouseDown = false;
 
     $(".dropdown").each(function(){
-        var $dropdown = $(this),
-            $elem = $(this).parent().find("> a");
+        var $elem = $(this).parent().find("> a");
 
         if(!$elem.parents(".logbox").length)
             $elem.addClass("has-dropdown");
 
         $elem
         .on("mousedown", function(){
-            mouseDown = true;
+            dropdownMouseDown = true;
         })
         .on("mouseup", function(){
-            mouseDown = false;
+            dropdownMouseDown = false;
         })
         .on("click", function(e){
             if(($(this).parents(".header-menu-list").length > 0 && parseInt($("html").css("width")) < 960))
@@ -46,32 +40,18 @@
         .on("focus", function(e){
             e.preventDefault();
 
-            if(!mouseDown && !$elem.hasClass("active")){
-                activeDropdown($elem);
+            if(!dropdownMouseDown && !$(this).hasClass("active")){
+                activeDropdown($(this));
                 
-                $elem
-                .off("blur")
-                .on("blur", function(){
-                    $elem
-                    .one("blur", function(){
-                        if(shiftHold)
-                            triggerCloseDropdown($elem);
-                    });
-
+                $(this)
+                .one("blur", function(){
+                    $elem = $(this);
                     setTimeout(function(){
-                        if($(":tabbable:focus", $dropdown).length){
-                            var listenBlurLast = function(){
-                                $(":tabbable:last", $dropdown)
-                                .one("blur", function(){
-                                    if(shiftHold){
-                                        listenBlurLast();
-                                        return;
-                                    }
-                                    $elem.removeClass("active");
-                                    triggerCloseDropdown($elem);
-                                });
-                            };
-                            listenBlurLast();
+                        if($(":tabbable:focus", $elem.parent().find(".dropdown")).length){
+                            $(":tabbable:last", $elem.parent().find(".dropdown")).one("blur", function(){
+                                $elem.removeClass("active");
+                                triggerCloseDropdown($elem);
+                            });
                         } else {
                             $elem.removeClass("active");
                             triggerCloseDropdown($elem);
@@ -122,6 +102,7 @@
             });
         } else {
             $("html").removeClass("dropdown-active");
+            $("body").off("click");
             $(".dropdown :tabbable").off("blur");
 
             if($that.is("[data-active]"))

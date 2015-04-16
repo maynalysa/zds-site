@@ -2,18 +2,17 @@
 {% load profile %}
 {% load crispy_forms_tags %}
 {% load captureas %}
-{% load i18n %}
 
 
 
 {% block title %}
-    {% trans "Répondre au sujet" %}
+    Répondre au sujet
 {% endblock %}
 
 
 
 {% block headline %}
-    {% trans "Répondre au sujet" %} {{ topic.title }}
+    Répondre au sujet {{ topic.title }}
 {% endblock %}
 
 
@@ -22,7 +21,7 @@
     <li><a href="{{ topic.forum.category.get_absolute_url }}">{{ topic.forum.category.title }}</a></li>
     <li><a href="{{ topic.forum.get_absolute_url }}">{{ topic.forum.title }}</a></li>
     <li><a href="{{ topic.get_absolute_url }}">{{ topic.title }}</a></li>
-    <li>{% trans "Répondre au sujet" %}</li>
+    <li>Répondre au sujet</li>
 {% endblock %}
 
 
@@ -30,10 +29,8 @@
 {% block content %}
     {% if newpost %}
         <div class="alert-box alert">
-            {% blocktrans %}
-                <strong>Au moins un nouveau message a été posté</strong> dans la discussion
-                pendant que vous rédigiez le votre.
-            {% endblocktrans %}
+            <strong>Au moins un nouveau message a été posté</strong> dans la discussion
+            pendant que vous rédigiez le votre.
         </div>
     {% endif %}
 

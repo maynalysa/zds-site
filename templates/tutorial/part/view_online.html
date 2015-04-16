@@ -1,5 +1,5 @@
 {% extends "tutorial/base_online.html" %}
-{% load i18n %}
+
 
 
 {% block title %}
@@ -36,18 +36,18 @@
 
 
 {% block headline %}
-    {% if part.tutorial.licence %}
-        <span class="license" itemprop="license">
-            {{ part.tutorial.licence }}
-        </span>
-    {% endif %}
-
     <h1 {% if tutorial.image %}class="illu"{% endif %} itemprop="name">
         {% if tutorial.image %}
             <img src="{{ tutorial.image.physical.tutorial_illu.url }}" alt="" itemprop="thumbnailUrl">
         {% endif %}
         {{ part.title }}
     </h1>
+
+    {% if tutorial.licence %}
+        <span class="license" itemprop="license">
+            Licence {{ tutorial.licence }}
+        </span>
+    {% endif %}
 
     {% include 'tutorial/includes/tags_authors.part.html' with tutorial=part.tutorial %}
 {% endblock %}
@@ -63,18 +63,16 @@
 {% block sidebar_blocks %}
     {% if perms.tutorial.change_tutorial %}
         <div class="mobile-menu-bloc mobile-all-links mobile-show-ico" data-title="Administration">
-            <h3>{% blocktrans %}Admin<span class="wide">istration</span>{% endblocktrans %}</h3>
+            <h3>Admin<span class="wide">istration</span></h3>
             <ul>
                 <li>
                     <a href="{{ part.tutorial.get_absolute_url }}" class="ico-after offline blue">
-                        {% trans "Version hors-ligne" %}
+                        Version hors-ligne
                     </a>
                 </li>
             </ul>
         </div>
     {% endif %}
 
-    {% include "tutorial/includes/summary.part.html" with online=True tutorial=tutorial parts=tutorial.parts %}
-
-    {% include "misc/social_buttons.part.html" with link=part.tutorial.get_absolute_url_online text=part.tutorial.title %}
+    {% include "tutorial/includes/summary.part.html" with online=True tutorial=part.tutorial parts=part.tutorial.get_parts %}
 {% endblock %}

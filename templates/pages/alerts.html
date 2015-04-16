@@ -1,44 +1,43 @@
 {% extends "pages/base.html" %}
 {% load date %}
-{% load i18n %}
 
 
 
 {% block title %}
-    {% trans "Liste des alertes en cours" %}
+    Liste des alertes en cours
 {% endblock %}
 
 
 
 {% block breadcrumb %}
-    <li>{% trans "Liste des alertes en cours" %}</li>
+    <li>Liste des alertes en cours</li>
 {% endblock %}
 
 
 
 {% block headline %}
-    <h1>{% trans "Liste des alertes en cours" %}</h1>
+    <h1>Liste des alertes en cours</h1>
 {% endblock %}
 
 
 
-{% block content_page %}
+{% block content %}
     <table class="fullwidth">
         <thead>
-            <th>{% trans "Type" %}</th>
-            <th>{% trans "Auteur" %}</th>
-            <th class="wide">{% trans "Date" %}</th>
-            <th class="wide">{% trans "Message" %}</th>
-            <th>{% trans "Sur un message de" %}...</th>
+            <th>Type</th>
+            <th>Auteur</th>
+            <th class="wide">Date</th>
+            <th class="wide">Message</th>
+            <th>Sur un message de...</th>
         </thead>
         <tbody>
             {% for alert in alerts %}
                 <tr>
                     <td>{{ alert.get_scope_display }}</td>
-                    <td><a href="{% url "member-detail" alert.author.username %}">{{ alert.author.username }}</a></td>
+                    <td><a href="{% url "zds.member.views.details" alert.author.username %}">{{ alert.author.username }}</a></td>
                     <td class="wide">{{ alert.pubdate|format_date|capfirst }}</td>
                     <td class="wide"><a href="{{ alert.get_comment_subclass.get_absolute_url }}">{{ alert.text }}</a></td>
-                    <td><a href="{% url "member-detail" alert.comment.author.username %}">{{ alert.comment.author.username }}</a>, {% blocktrans with timing=alert.comment.pubdate|format_date%} posté le {{ timing }} {% endblocktrans %}</td>
+                    <td><a href="{% url "zds.member.views.details" alert.comment.author.username %}">{{ alert.comment.author.username }}</a>, posté le {{ alert.comment.pubdate|format_date }}</td>
                 </tr>
             {% endfor %}
         </tbody>

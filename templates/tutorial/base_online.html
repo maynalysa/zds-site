@@ -1,11 +1,10 @@
 {% extends "tutorial/base.html" %}
 {% load captureas %}
-{% load i18n %}
 
 
 
 {% block title_base %}
-    &bull; {% trans "Tutoriels" %}
+    &bull; Tutoriels
 {% endblock %}
 
 
@@ -21,7 +20,7 @@
 {% block breadcrumb_base %}
     <li itemscope itemtype="http://data-vocabulary.org/Breadcrumb">
         <a href="{% url "zds.tutorial.views.index" %}" itemprop="url">
-            <span itemprop="title">{% trans "Tutoriels" %}</span>
+            <span itemprop="title">Tutoriels</span>
         </a>
     </li>
 {% endblock %}

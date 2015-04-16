@@ -2,24 +2,24 @@
 {% load profile %}
 {% load crispy_forms_tags %}
 {% load captureas %}
-{% load i18n %}
+
 
 
 {% block title %}
-    {% trans "Commenter le tutoriel" %}
+    Commenter le tutoriel
 {% endblock %}
 
 
 
 {% block breadcrumb %}
     <li><a href="{{ tutorial.get_absolute_url_online }}">{{ tutorial.title }}</a></li>
-    <li>{% trans "Commenter le tutoriel" %}</li>
+    <li>Commenter le tutoriel</li>
 {% endblock %}
 
 
 
 {% block headline %}
-    <h1>{% trans "Ajouter un commentaire au tutoriel" %} : {{ tutorial.title }}</h1>
+    <h1>Ajouter un commentaire au tutoriel : {{ tutorial.title }}</h1>
 {% endblock %}
 
 
@@ -33,9 +33,8 @@
 {% block content_after %}
     {% if newnote %}
         <div class="alert-box alert">
-            {% blocktrans %}
-            <strong>Au moins un nouveau message a été posté</strong> dans la discussion pendant que vous rédigiez le votre.
-            {% endblocktrans %}
+            <strong>Au moins un nouveau message a été posté</strong> dans la discussion
+            pendant que vous rédigiez le votre.
         </div>
     {% endif %}
 
@@ -52,7 +51,7 @@
             {% endcaptureas %}
 
             {% captureas cite_link %}
-                {% url "zds.tutorial.views.answer" %}?tutorial={{ tutorial.pk }}&amp;cite={{ message.pk }}
+                {% url "zds.tutorial.views.answer" %}?tutorial={{ topic.pk }}&amp;cite={{ message.pk }}
             {% endcaptureas %}
 
             {% captureas upvote_link %}

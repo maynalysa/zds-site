@@ -1,17 +1,15 @@
 # coding: utf-8
 
-from django.contrib.auth.models import User, Permission, Group
+from django.contrib.auth.models import User, Permission
 import factory
 
 from zds.member.models import Profile
 
+# Don't try to directly use UserFactory, this didn't create Profile then
+# don't work!
+
 
 class UserFactory(factory.DjangoModelFactory):
-    """
-    This factory creates User.
-    WARNING: Don't try to directly use `UserFactory`, this didn't create associated Profile then don't work!
-    Use `ProfileFactory` instead.
-    """
     FACTORY_FOR = User
 
     username = factory.Sequence(lambda n: 'firm{0}'.format(n))
@@ -30,13 +28,11 @@ class UserFactory(factory.DjangoModelFactory):
                 user.save()
         return user
 
+# Don't try to directly use StaffFactory, this didn't create Profile then
+# don't work!
+
 
 class StaffFactory(factory.DjangoModelFactory):
-    """
-    This factory creates staff User.
-    WARNING: Don't try to directly use `StaffFactory`, this didn't create associated Profile then don't work!
-    Use `StaffProfileFactory` instead.
-    """
     FACTORY_FOR = User
 
     username = factory.Sequence(lambda n: 'firmstaff{0}'.format(n))
@@ -54,23 +50,19 @@ class StaffFactory(factory.DjangoModelFactory):
             user.set_password(password)
             if create:
                 user.save()
-        group_staff = Group.objects.filter(name="staff").first()
-        if group_staff is None:
-            group_staff = Group(name="staff")
-            group_staff.save()
-
         perms = Permission.objects.filter(codename__startswith='change_').all()
-        group_staff.permissions = perms
-        user.groups.add(group_staff)
+
+        user.user_permissions = list(perms)
+        user.user_permissions.add(
+            Permission.objects.get(
+                codename='moderation'))
+        user.user_permissions.add(Permission.objects.get(codename='show_ip'))
 
         user.save()
         return user
 
 
 class ProfileFactory(factory.DjangoModelFactory):
-    """
-    Use this factory when you need a complete Profile for a standard user.
-    """
     FACTORY_FOR = Profile
 
     user = factory.SubFactory(UserFactory)
@@ -80,15 +72,14 @@ class ProfileFactory(factory.DjangoModelFactory):
 
     @factory.lazy_attribute
     def biography(self):
-        return u'My name is {0} and I i\'m the guy who kill the bad guys '.format(self.user.username.lower())
+        return 'My name is {0} and I i\'m the '
+        u'guy who kill the bad guys '.format(
+            self.user.username.lower())
 
     sign = 'Please look my flavour'
 
 
 class StaffProfileFactory(factory.DjangoModelFactory):
-    """
-    Use this factory when you need a complete Profile for a staff user.
-    """
     FACTORY_FOR = Profile
 
     user = factory.SubFactory(StaffFactory)
@@ -98,26 +89,20 @@ class StaffProfileFactory(factory.DjangoModelFactory):
 
     @factory.lazy_attribute
     def biography(self):
-        return u'My name is {0} and I i\'m the guy who kill the bad guys '.format(self.user.username.lower())
+        return 'My name is {0} and I i\'m the '
+        u'guy who kill the bad guys '.format(
+            self.user.username.lower())
 
     sign = 'Please look my flavour'
 
 
 class NonAsciiUserFactory(UserFactory):
-    """
-    This factory creates standard user with non-ASCII characters in its username.
-    WARNING: Don't try to directly use `NonAsciiUserFactory`, this didn't create associated Profile then don't work!
-    Use `NonAsciiProfileFactory` instead.
-    """
     FACTORY_FOR = User
 
     username = factory.Sequence(lambda n: u'ïéàçÊÀ{0}'.format(n))
 
 
 class NonAsciiProfileFactory(ProfileFactory):
-    """
-    Use this factory to create a standard user with non-ASCII characters in its username.
-    """
     FACTORY_FOR = Profile
 
     user = factory.SubFactory(NonAsciiUserFactory)

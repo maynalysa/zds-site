@@ -1,7 +1,6 @@
 {% load date %}
 {% load captureas %}
 {% load thumbnail %}
-{% load i18n %}
 
 <article>
     {% if not link %}
@@ -19,7 +18,7 @@
 
     <div class="tutorial-infos {% if not article.image %}no-illu{% endif %}">
         <h3 itemprop="itemListElement">
-            <a href="{{ link }}" title="{{ article.title }}">
+            <a href="{{ link }}">
                 {{ article.title }}
             </a>
         </h3>
@@ -35,15 +34,15 @@
                     {% endif %}
                 ">
                     {% if article.get_reaction_count == 0 %}
-                        {% trans "Aucune réaction" %}
+                        Aucune réaction
                     {% else %}
                         {{ article.get_reaction_count }} réaction{{ article.get_reaction_count|pluralize }}
                     {% endif %}
                 </a>
             {% elif article.sha_validation %}
-                {% trans "En validation" %}
+                En validation
             {% else %}
-                {% trans "Brouillon" %}
+                Brouillon
             {% endif %}
         </p>
     </div>

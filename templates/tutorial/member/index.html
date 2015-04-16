@@ -1,47 +1,40 @@
 {% extends "tutorial/base.html" %}
 {% load date %}
-{% load i18n %}
+
 
 
 {% block title %}
-    {% trans "Mes tutoriels" %}
+    Mes tutoriels
     {% if request.GET.type == "public" %}
-        / {% trans "Publiés" %}
+        / Publiés
     {% elif request.GET.type == "validate" %}
-        / {% trans "En validation" %}
+        / En validation
     {% elif request.GET.type == "beta" %}
-        / {% trans "En bêta" %}
+        / En bêta
     {% elif request.GET.type == "draft" %}
-        / {% trans "Brouillons" %}
-    {% endif %}
-    {% if sort == "abc" %}
-        / Par ordre alphabétique
-    {% elif sort == "creation" %}
-        / Par date de création
-    {% elif sort == "modification" %}
-        / Par date de dernière modification
+        / Brouillons
     {% endif %}
 {% endblock %}
 
 
 
 {% block breadcrumb_base %}
-    <li><a href="{% url "zds.member.views.tutorials" %}">{% trans "Mes tutoriels" %}</a></li>
+    <li><a href="{% url "zds.member.views.tutorials" %}">Mes tutoriels</a></li>
 {% endblock %}
 
 
 
 {% block breadcrumb %}
     {% if request.GET.type == "public" %}
-        <li>{% trans "Publiés" %}</li>
+        <li>Publiés</li>
     {% elif request.GET.type == "validate" %}
-        <li>{% trans "En validation" %}</li>
+        <li>En validation</li>
     {% elif request.GET.type == "beta" %}
-        <li>{% trans "En bêta" %}</li>
+        <li>En bêta</li>
     {% elif request.GET.type == "draft" %}
-        <li>{% trans "Brouillons" %}</li>
+        <li>Brouillons</li>
     {% else %}
-        <li>{% trans "Tous mes tutoriels" %}</li>
+        <li>Tous mes tutoriels</li>
     {% endif %}
 {% endblock %}
 
@@ -51,22 +44,15 @@
     <section class="full-content-wrapper">
         <h2 class="ico-after ico-tutorials">
             {% block headline %}
-                {% trans "Mes tutoriels" %}
+                Mes tutoriels
                 {% if request.GET.type == "public" %}
-                    / {% trans "Publiés" %}
+                    / Publiés
                 {% elif request.GET.type == "validate" %}
-                    / {% trans "En validation" %}
+                    / En validation
                 {% elif request.GET.type == "beta" %}
-                    / {% trans "En bêta" %}
+                    / En bêta
                 {% elif request.GET.type == "draft" %}
-                    / {% trans "Brouillons" %}
-                {% endif %}
-                {% if sort == "abc" %}
-                    / Par ordre alphabétique
-                {% elif sort == "creation" %}
-                    / Par date de création
-                {% elif sort == "modification" %}
-                    / Par date de dernière modification
+                    / Brouillons
                 {% endif %}
             {% endblock %}
         </h2>
@@ -92,9 +78,9 @@
                                             {{ category.title }}                                    
                                         {% endfor %}
                                     {% else %}
-                                        {% trans "Aucune catégorie" %}
+                                        Aucune catégorie
                                     {% endif %}
-                                    - {% trans "Créé" %} {{ tutorial.create_at|format_date }}
+                                    - Créé {{ tutorial.create_at|format_date }}
                                 </span>
                             </div>
                         </a>
@@ -103,7 +89,7 @@
             </div>
         {% else %}
             <p>
-                {% trans "Aucun tutoriel disponible" %}.
+                Aucun tutoriel disponible.
             </p>
         {% endif %}
     </section>
@@ -113,10 +99,10 @@
 
 {% block sidebar_new %}
     <a href="{% url "zds.tutorial.views.add_tutorial" %}" class="new-btn ico-after more blue">
-        {% trans "Nouveau tutoriel" %}
+        Nouveau tutoriel
     </a>
     <a href="{% url "zds.tutorial.views.import_tuto" %}" class="new-btn ico-after import blue">
-        {% trans "Importer" %}
+        Importer
     </a>
 {% endblock %}
 
@@ -124,56 +110,36 @@
 
 {% block sidebar_blocks %}
     <div class="mobile-menu-bloc mobile-all-links mobile-show-ico" data-title="Actions">
-        <h3>{% trans "Filtres" %}</h3>
+        <h3>Filtres</h3>
         <ul>
             <li>
-                <a href="{% url "zds.member.views.tutorials" %}?type=public{% if sort %}&sort={{ sort }}{% endif %}" class="ico-after tick green {% if request.GET.type == "public" %}selected{% endif %}">
-                    {% trans "Publiés" %}
+                <a href="{% url "zds.member.views.tutorials" %}?type=public" class="ico-after tick green {% if request.GET.type == "public" %}unread{% endif %}">
+                    Publiés
                 </a>
             </li>
             <li>
-                <a href="{% url "zds.member.views.tutorials" %}?type=validate{% if sort %}&sort={{ sort }}{% endif %}" class="ico-after tick {% if request.GET.type == "validate" %}selected{% endif %}">
-                    {% trans "En validation" %}
+                <a href="{% url "zds.member.views.tutorials" %}?type=validate" class="ico-after tick {% if request.GET.type == "validate" %}unread{% endif %}">
+                    En validation
                 </a>
             </li>
             <li>
-                <a href="{% url "zds.member.views.tutorials" %}?type=beta{% if sort %}&sort={{ sort }}{% endif %}" class="ico-after beta {% if request.GET.type == "beta" %}selected{% endif %}">
-                    {% trans "En bêta" %}
+                <a href="{% url "zds.member.views.tutorials" %}?type=beta" class="ico-after beta {% if request.GET.type == "beta" %}unread{% endif %}">
+                    En bêta
                 </a>
             </li>
             <li>
-                <a href="{% url "zds.member.views.tutorials" %}?type=draft{% if sort %}&sort={{ sort }}{% endif %}" class="ico-after edit {% if request.GET.type == "draft" %}selected{% endif %}">
-                    {% trans "Brouillons" %}
+                <a href="{% url "zds.member.views.tutorials" %}?type=draft" class="ico-after edit {% if request.GET.type == "draft" %}unread{% endif %}">
+                    Brouillons
                 </a>
             </li>
 
             {% if request.GET.type %}
                 <li>
-                    <a href="{% url "zds.member.views.tutorials" %}{% if sort %}?sort={{ sort }}{% endif %}" class="ico-after cross">
-                        {% trans "Annuler le filtre" %}
+                    <a href="{% url "zds.member.views.tutorials" %}" class="ico-after cross">
+                        Annuler le filtre
                     </a>
                 </li>
             {% endif %}
         </ul>
-        <div class="mobile-menu-bloc mobile-all-links" data-title="Trier">
-            <h3>Trier</h3>
-            <ul>
-                <li>
-                    <a href="{% url "zds.member.views.tutorials" %}?sort=abc{% if type %}&type={{ type }}{% endif %}" class="ico-after gear {% if sort == "abc" %}selected{% endif %}">
-                        Par ordre alphabétique
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url "zds.member.views.tutorials" %}?sort=creation{% if type %}&type={{ type }}{% endif %}" class="ico-after gear {% if sort == "creation" %}selected{% endif %}">
-                        Par date de création
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url "zds.member.views.tutorials" %}?sort=modification{% if type %}&type={{ type }}{% endif %}" class="ico-after gear {% if sort == "modification" %}selected{% endif %}">
-                        Par date de dernière modification
-                    </a>
-                </li>
-            </ul>
-        </div>
     </div>
 {% endblock %}

@@ -17,15 +17,6 @@ if [ "$#" -ne 1 ]; then
 	echo "Usage: $0 <tag name>" >&2
 	exit 1
 fi
-
-read -p "Did you run specific tasks for this version as described in update.md? [y/N] " -r
-echo    # move to a new line
-if [[ ! $REPLY =~ ^[Yy]$ ]]
-then
-	echo "Do it, now!"
-	exit 1
-fi
-
 cd /opt/zdsenv/ZesteDeSavoir/
 
 # Maintenance mode
@@ -45,24 +36,16 @@ git checkout $1
 # Create a branch with the same name - required to have version data in footer
 git checkout -b $1
 
-# Front commands
-[ -s /usr/local/nvm.sh ] && . /usr/local/nvm/nvm.sh
-# Update packages
-npm install --production
-# Remove unused packages
-npm prune --production
-# Clean the front stuff
-npm run clean
-# Build the front stuff
-npm run build
+# Compute front stuff
+source /usr/local/nvm/nvm.sh
+sudo npm -q update
+sudo npm -q update bower gulp -g
+gulp pack
 
 # Update application data
 source ../bin/activate
 pip install --upgrade --use-mirrors -r requirements.txt
 python manage.py migrate
-python manage.py compilemessages
-# Collect all staticfiles from dist/ and python packages to static/
-python manage.py collectstatic --noinput --clear
 deactivate
 
 # Restart zds
@@ -75,4 +58,4 @@ sudo service nginx reload
 
 # Display current branch and commit
 git status
-echo "Deployed commit: `git rev-parse HEAD`"
+echo "Commit deployé : `git rev-parse HEAD`"
