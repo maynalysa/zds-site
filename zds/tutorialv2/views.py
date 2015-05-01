@@ -257,7 +257,7 @@ class DisplayOnlineContent(SingleOnlineContentDetailViewMixin):
     model = PublishedContent
     template_name = 'tutorialv2/view/content_online.html'
 
-    content_type = ""
+    current_content_type = ""
     verbose_type_name = _(u'contenu')
     verbose_type_name_plural = _(u'contenus')
 
@@ -300,7 +300,7 @@ class DisplayOnlineContent(SingleOnlineContentDetailViewMixin):
 class DisplayOnlineArticle(DisplayOnlineContent):
     """Displays the list of published articles"""
 
-    content_type = "ARTICLE"
+    current_content_type = "ARTICLE"
     verbose_type_name = _(u'article')
     verbose_type_name_plural = _(u'articles')
 
@@ -308,7 +308,7 @@ class DisplayOnlineArticle(DisplayOnlineContent):
 class DisplayOnlineTutorial(DisplayOnlineContent):
     """Displays the list of published tutorials"""
 
-    content_type = "TUTORIAL"
+    current_content_type = "TUTORIAL"
     verbose_type_name = _(u'tutoriel')
     verbose_type_name_plural = _(u'tutoriels')
 
@@ -785,7 +785,7 @@ class DisplayOnlineContainer(SingleOnlineContentDetailViewMixin):
     """Base class that can show any content in any state"""
 
     template_name = 'tutorialv2/view/container_online.html'
-    content_type = "TUTORIAL"  # obviously, an article cannot have container !
+    current_content_type = "TUTORIAL"  # obviously, an article cannot have container !
 
     def get_context_data(self, **kwargs):
         context = super(DisplayOnlineContainer, self).get_context_data(**kwargs)
@@ -1180,7 +1180,7 @@ class ListOnlineContents(ContentTypeMixin, ListView):
         # TODO: since this is gonna be reused, it should go in zds/utils/tutorialsv2.py (and in topbar.py)
 
         subcategories_contents = PublishedContent.objects\
-            .filter(content_type=self.content_type)\
+            .filter(content_type=self.current_content_type)\
             .values('content__subcategory').all()
 
         categories_from_subcategories = CategorySubCategory.objects\
@@ -1215,7 +1215,7 @@ class ListOnlineContents(ContentTypeMixin, ListView):
             .prefetch_related("content")\
             .prefetch_related("content__subcategory")\
             .prefetch_related("content__authors")\
-            .filter(content_type=self.content_type)
+            .filter(content_type=self.current_content_type)
 
         if 'tag' in self.request.GET:
             self.tag = get_object_or_404(SubCategory, slug=self.request.GET.get('tag'))
@@ -1235,13 +1235,13 @@ class ListOnlineContents(ContentTypeMixin, ListView):
 class ListArticles(ListOnlineContents):
     """Displays the list of published articles"""
 
-    content_type = "ARTICLE"
+    current_content_type = "ARTICLE"
 
 
 class ListTutorials(ListOnlineContents):
     """Displays the list of published tutorials"""
 
-    content_type = "TUTORIAL"
+    current_content_type = "TUTORIAL"
 
 
 class ContentsWithHelps(ListView):
