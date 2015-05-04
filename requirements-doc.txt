@@ -6,14 +6,11 @@ six==1.9.0
 
 # Explicit dependencies (references in code)
 django==1.7.7
-coverage==3.7.1
 django-crispy-forms==1.4.0
 django-haystack==2.3.1
 django-model-utils==2.2
 django-munin==0.1.5
-python-memcached==1.53
 lxml==3.4.2
-factory-boy==2.4.1
 pygeoip==0.3.2
 pillow==2.7.0
 gitpython==0.3.6
@@ -29,4 +26,5 @@ drf-extensions==0.2.7
 django-rest-swagger==0.2.9
 django-cors-headers==1.0.0
 
+# dev dependencies
 django-debug-toolbar==1.2.2
