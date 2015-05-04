@@ -28,3 +28,6 @@ django-oauth-toolkit==0.7.2
 drf-extensions==0.2.7
 django-rest-swagger==0.2.9
 django-cors-headers==1.0.0
+
+# Test (ceci n'a aucun sens)
+django-debug-toolbar==1.2.2
