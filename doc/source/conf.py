@@ -30,6 +30,10 @@ if not on_rtd:
 sys.path.insert(0, os.path.abspath('../../'))  # add modules to python search path
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'zds.settings')   # Django should use OUR settings also with SPHINX
 
+from django.conf import settings
+
+settings.DEBUG = False
+
 import django
 django.setup()
 
