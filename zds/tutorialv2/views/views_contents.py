@@ -1454,9 +1454,7 @@ class ContentOfAuthor(ZdSPagingListView):
         else:
             user = self.request.user
         self.query_set = PublishableContent.objects.filter(authors__in=[user], type=self.content_type)
-        if "type" not in self.request.GET:
-            return super(ContentOfAuthor, self).get_queryset()
-        else:
+        if "type" in self.request.GET:
             _type = self.request.GET['type'].lower()
             if _type not in self.authorized_filters:
                 raise Http404
@@ -1468,7 +1466,7 @@ class ContentOfAuthor(ZdSPagingListView):
             self.query_set = self.sorts[''](self.query_set)
             self.sort = ''
 
-        return super(ContentOfAuthor, self).get_queryset()
+        return self.query_set
 
     def get_context_data(self, **kwargs):
         """Separate articles and tutorials"""
