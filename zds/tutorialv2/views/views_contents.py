@@ -1472,7 +1472,7 @@ class ContentOfAuthor(ZdSPagingListView):
 
     def get_context_data(self, **kwargs):
         """Separate articles and tutorials"""
-        context = super(ListContents, self).get_context_data(**kwargs)
+        context = super(ContentOfAuthor, self).get_context_data(**kwargs)
         context['sorts'] = []
         context['sort'] = self.sort.lower()
         context['is_staff'] = self.request.user.has_perm('tutorial.change_tutorial')
