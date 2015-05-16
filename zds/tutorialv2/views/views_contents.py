@@ -1436,7 +1436,7 @@ class ContentOfAuthor(ZdSPagingListView):
     context_object_name = "contents"
     template_name = 'tutorialv2/index.html'
     model = PublishableContent
-    queryset = PublishableContent.objects.filter(type=content_type)
+
     authorized_filters = {
         'validation': lambda q: q.filter(sha_validation__isnull=False),
         'redaction': lambda q: q.filter(sha_validation__isnull=True, sha_public__isnull=True, sha_beta__isnull=True),
@@ -1455,20 +1455,20 @@ class ContentOfAuthor(ZdSPagingListView):
             user = get_object_or_404(User, pk=int(self.kwargs["pk"]))
         else:
             user = self.request.user
-        self.queryset = PublishableContent.objects.filter(authors__in=[user])
+        queryset = PublishableContent.objects.filter(authors__in=[user], type=self.content_type)
         if "type" in self.request.GET:
             _type = self.request.GET['type'].lower()
             if _type not in self.authorized_filters:
                 raise Http404
-            self.queryset = self.authorized_filters[_type](self.queryset)
+            queryset = self.authorized_filters[_type](queryset)
         if "sort" in self.request.GET and self.request.GET["sort"].lower() in self.sorts:
-            self.queryset = self.sorts[self.request.GET["sort"].lower()][0](self.queryset)
+            queryset = self.sorts[self.request.GET["sort"].lower()][0](queryset)
             self.sort = self.request.GET["sort"]
         else:
-            self.queryset = self.sorts[''](self.queryset)
+            queryset = self.sorts[''](queryset)
             self.sort = ''
 
-        return self.queryset
+        return queryset
 
     def get_context_data(self, **kwargs):
         """Separate articles and tutorials"""
