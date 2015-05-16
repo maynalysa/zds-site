@@ -1450,7 +1450,7 @@ class ContentOfAuthor(ZdSPagingListView):
 
     def get_queryset(self):
         if "pk" in self.kwargs:
-            user = get_object_or_404(int(self.kwargs["pk"]))
+            user = get_object_or_404(pk=int(self.kwargs["pk"]))
         else:
             user = self.request.user
         self.queryset = PublishableContent.filter(authors__in=[user], type=self.content_type)
