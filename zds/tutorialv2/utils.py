@@ -458,12 +458,11 @@ def make_zip_file(published_content):
     publishable = published_content.content
     path = os.path.join(published_content.get_extra_contents_directory(),
                         "archive")
-    final_path = os.path.join(published_content.get_extra_contents_directory(),
-                              published_content.content_public_slug)
+
     shutil.copytree(publishable.get_repo_path(False), path)
     shutil.rmtree(os.path.join(path, ".git"))
-    shutil.make_archive(path, "zip")
-    shutil.move(path + ".zip", final_path + ".zip")
+    shutil.make_archive(os.path.join(published_content.get_extra_contents_directory(),
+                                     published_content.content_public_slug), "zip", path)
 
 
 def unpublish_content(db_object):
