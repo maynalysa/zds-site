@@ -535,11 +535,18 @@ class UpdateContentWithArchive(LoggedWithReadWriteHability, SingleContentFormVie
                     conclusion = unicode(zip_file.read(child.conclusion), 'utf-8')
 
                 copy_to.repo_add_container(child.title, introduction, conclusion, do_commit=False)
+
+                if copy_to.children[-1].slug != child.slug:
+                    copy_to.children[-1].change_slug(child.slug)
+
                 UpdateContentWithArchive.update_from_new_version_in_zip(copy_to.children[-1], child, zip_file)
 
             elif isinstance(child, Extract):
                 text = unicode(zip_file.read(child.text), 'utf-8')
                 copy_to.repo_add_extract(child.title, text, do_commit=False)
+
+                if copy_to.children[-1].slug != child.slug:
+                    copy_to.children[-1].change_slug(child.slug)  # try to keep same slug, if possible
 
     @staticmethod
     def use_images_from_archive(request, zip_file, versioned_content, gallery):
@@ -701,6 +708,8 @@ class UpdateContentWithArchive(LoggedWithReadWriteHability, SingleContentFormVie
 
                 # then do the dirty job:
                 UpdateContentWithArchive.update_from_new_version_in_zip(versioned, new_version, zfile)
+                versioned.dump_json()
+                versioned.repository.index.add(['manifest.json'])
 
                 # and end up by a commit !!
                 commit_message = form.cleaned_data['msg_commit']
@@ -812,6 +821,8 @@ class CreateContentFromArchive(LoggedWithReadWriteHability, FormView):
                 # copy all:
                 versioned = self.object.load_version()
                 UpdateContentWithArchive.update_from_new_version_in_zip(versioned, new_content, zfile)
+                versioned.dump_json()
+                versioned.repository.index.add(['manifest.json'])
 
                 # and end up by a commit !!
                 commit_message = form.cleaned_data['msg_commit']

@@ -132,6 +132,30 @@ class ContentTests(TestCase):
 
             slugs.append(new_version.children[-1].children[-1].slug)
 
+    def test_change_slug(self):
+        """ensure the behavior of the `change_slug()` function"""
+
+        new_slug = 'un-slug-de-test'
+        invalid_slug = 'ceci n\'est pas un slug'
+
+        # test for containers
+        old_chapter_slug = self.chapter1.slug
+
+        self.assertFalse(self.chapter1.change_slug(invalid_slug))
+        self.assertTrue(self.chapter1.change_slug(new_slug))
+        self.assertFalse(self.chapter1.change_slug(new_slug))  # the second time, the slug is already in pool !
+
+        self.assertTrue(self.chapter1.change_slug(old_chapter_slug))  # back to normal
+
+        # test for extracts
+        old_extract_slug = self.extract1.slug
+
+        self.assertFalse(self.extract1.change_slug(invalid_slug))
+        self.assertTrue(self.extract1.change_slug(new_slug))
+        self.assertFalse(self.extract1.change_slug(new_slug))
+
+        self.assertTrue(self.extract1.change_slug(old_extract_slug))
+
     def test_workflow_repository(self):
         """
         Test to ensure the behavior of repo_*() functions :

@@ -9,6 +9,7 @@ import codecs
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
+from django.core.validators import validate_slug, ValidationError
 from django.utils.translation import ugettext_lazy as _
 from zds.settings import ZDS_APP
 from zds.tutorialv2.utils import default_slug_pool, export_content, get_commit_author, InvalidOperationError
@@ -261,7 +262,6 @@ class Container:
             extract.position_in_parent = self.get_last_child_position() + 1
             self.children.append(extract)
             self.children_dict[extract.slug] = extract
-            extract.text = extract.get_path(True)
         else:
             raise InvalidOperationError(_(u"Impossible d'ajouter un extrait au conteneur « {} »").format(self.title))
 
@@ -441,6 +441,39 @@ class Container:
             files.append(os.path.join(self.top_container().get_path(), self.conclusion))
 
         return compute_hash(files)
+
+    def change_slug(self, new_slug):
+        """Change the current slug for a new one, if possible. Note that change are not commited.
+
+        :param new_slug: the new slug
+        :type new_slug: str
+        :return: ``True`` if the slug is changed, ``False`` otherwise
+        """
+
+        if not self.parent:  # top container cannot have its slug changed (database !)
+            return False
+
+        try:
+            validate_slug(new_slug)
+        except ValidationError:
+            return False
+
+        old_slug = self.slug
+
+        try:
+            self.parent.add_slug_to_pool(new_slug)
+            self.slug = new_slug
+        except InvalidOperationError:
+            return False
+
+        # clean slug pool
+        self.parent.slug_pool.pop(old_slug)
+
+        # update parent children dict:
+        self.parent.children_dict.pop(old_slug)
+        self.parent.children_dict[self.slug] = self
+
+        return True
 
     def repo_update(self, title, introduction, conclusion, commit_message='', do_commit=True, update_slug=True):
         """Update the container information and commit them into the repository
@@ -871,6 +904,36 @@ class Extract:
 
         else:
             return compute_hash([])
+
+    def change_slug(self, new_slug):
+        """Change the current slug for a new one, if possible. Note that change are not commited.
+
+        :param new_slug: the new slug
+        :type new_slug: str
+        :return: ``True`` if the slug is changed, ``False`` otherwise
+        """
+
+        try:
+            validate_slug(new_slug)
+        except ValidationError:
+            return False
+
+        old_slug = self.slug
+
+        try:
+            self.container.add_slug_to_pool(new_slug)
+            self.slug = new_slug
+        except InvalidOperationError:
+            return False
+
+        # clean parent slug pool
+        self.container.slug_pool.pop(old_slug)
+
+        # update parent children dict:
+        self.container.children_dict.pop(old_slug)
+        self.container.children_dict[self.slug] = self
+
+        return True
 
     def repo_update(self, title, text, commit_message='', do_commit=True):
         """
