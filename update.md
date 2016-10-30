@@ -803,3 +803,14 @@ Le déploiement doit être autonome. Ce qui implique que :
 1. La mise à jour de dépendances est automatique et systématique,
 2. La personne qui déploie ne doit pas réfléchir (parce que c'est source d'erreur),
 3. La personne qui déploie ne doit pas avoir connaissance de ce qui est déployé (techniquement et fonctionnellement).
+
+Actions à faire pour mettre en prod la version 20.2
+===================================================
+
+Activer la Clem' d'Halloween en rajoutant
+
+```py
+ZDS_APP['visual_changes'] = ['clem-halloween']
+```
+
+Dans le `settings_prod.py`, et ce pour une semaine.
