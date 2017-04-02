@@ -429,11 +429,6 @@ def unpublish_content(db_object):
 
     try:
         public_version = PublishedContent.objects.get(pk=db_object.public_version.pk)
-    except Exception as e:
-        print('got in get {}'.format(e))
-
-    try:
-        public_version = PublishedContent.objects.get(pk=db_object.public_version.pk)
 
         # clean files
         old_path = public_version.get_prod_path()

@@ -233,8 +233,13 @@ def delete_document_in_elasticsearch(instance):
     :type instance: AbstractESIndexable
     """
 
+    print('dx1')
+
     index_manager = ESIndexManager(**settings.ES_SEARCH_INDEX)
     index_manager.delete_document(instance)
+
+    print('dx2')
+
     index_manager.refresh_index()
 
 
@@ -600,8 +605,11 @@ class ESIndexManager(object):
             return
 
         arguments = {'index': self.index, 'doc_type': document.get_es_document_type(), 'id': document.es_id}
+        print(arguments)
         if self.es.exists(**arguments):
+            print('e1')
             self.es.delete(**arguments)
+            print('e2')
             self.logger.info('delete {} with id {}'.format(document.get_es_document_type(), document.es_id))
 
     def delete_by_query(self, doc_type='', query=MatchAll()):
