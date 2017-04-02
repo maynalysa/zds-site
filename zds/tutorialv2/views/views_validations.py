@@ -606,12 +606,19 @@ class Unpublish(LoginRequiredMixin, SingleOnlineContentFormViewMixin, NoValidati
         if user not in versioned.authors.all() and not user.has_perm('tutorialv2.change_validation'):
             raise PermissionDenied
 
-        unpublish_content(self.object)
+        try:
+            unpublish_content(self.object)
+        except Exception as e:
+            print('got something for unpublish_content: {}'.format(e))
 
         self.object.sha_public = None
         self.object.sha_approved = None
         self.object.pubdate = None
-        self.object.save()
+
+        try:
+            self.object.save()
+        except Exception as e:
+            print('got something for save(): {}'.format(e))
 
         # send PM
         msg = render_to_string(
