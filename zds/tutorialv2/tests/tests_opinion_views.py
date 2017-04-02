@@ -199,6 +199,8 @@ class PublishedContentTests(TestCase):
             follow=False)
         self.assertEqual(result.status_code, 302)
 
+        opinion = PublishableContent.objects.get(pk=opinion.pk)
+
         # unpublish
         result = self.client.post(
             reverse('validation:unpublish-opinion', kwargs={'pk': opinion.pk, 'slug': opinion.slug}),
