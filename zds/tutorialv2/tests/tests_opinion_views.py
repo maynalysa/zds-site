@@ -188,6 +188,8 @@ class PublishedContentTests(TestCase):
                 password='hostel77'),
             True)
 
+        opinion = PublishableContent.objects.get(pk=opinion.pk)
+
         # publish
         result = self.client.post(
             reverse('validation:publish-opinion', kwargs={'pk': opinion.pk, 'slug': opinion.slug}),
@@ -200,6 +202,7 @@ class PublishedContentTests(TestCase):
         self.assertEqual(result.status_code, 302)
 
         opinion = PublishableContent.objects.get(pk=opinion.pk)
+        self.assertEqual(opinion.sha_public, opinion_draft.current_version)
 
         # unpublish
         result = self.client.post(
