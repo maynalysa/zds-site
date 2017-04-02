@@ -605,11 +605,8 @@ class ESIndexManager(object):
             return
 
         arguments = {'index': self.index, 'doc_type': document.get_es_document_type(), 'id': document.es_id}
-        print(arguments)
         if self.es.exists(**arguments):
-            print('e1')
             self.es.delete(**arguments)
-            print('e2')
             self.logger.info('delete {} with id {}'.format(document.get_es_document_type(), document.es_id))
 
     def delete_by_query(self, doc_type='', query=MatchAll()):
