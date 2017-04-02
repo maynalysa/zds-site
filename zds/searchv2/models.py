@@ -573,6 +573,9 @@ class ESIndexManager(object):
         if not self.connected_to_es:
             return
 
+        if not self.es.indices.exists(self.index):
+            return
+
         self.es.indices.refresh(self.index)
 
     def update_single_document(self, document, doc):
