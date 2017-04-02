@@ -595,11 +595,13 @@ class UnpublishOpinion(LoginRequiredMixin, SingleOnlineContentFormViewMixin, NoV
     modal_form = True
 
     def get_form_kwargs(self):
+        print('été là ?')
         kwargs = super(UnpublishOpinion, self).get_form_kwargs()
         kwargs['content'] = self.versioned_object
         return kwargs
 
     def form_valid(self, form):
+        print('été ici ?')
         versioned = self.versioned_object
 
         user = self.request.user
@@ -607,12 +609,23 @@ class UnpublishOpinion(LoginRequiredMixin, SingleOnlineContentFormViewMixin, NoV
         if user not in versioned.authors.all() and not user.has_perm('tutorialv2.change_validation'):
             raise PermissionDenied
 
-        unpublish_content(self.object)
+        if self.versioned_object.current_version != self.object.sha_public:
+            print('Non, mais pas celui là: {} != {}'.format(self.versioned_object.current_version, self.object.sha_public))
+            raise Http404
+
+        try:
+            unpublish_content(self.object)
+        except Exception as e:
+            print('got in unpublish {}'.format(e))
 
         self.object.sha_public = None
         self.object.sha_picked = None
         self.object.pubdate = None
-        self.object.save()
+
+        try:
+            self.object.save()
+        except Exception as e:
+            print('got in save {}'.format(e))
 
         # send PM
         msg = render_to_string(

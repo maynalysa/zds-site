@@ -472,9 +472,12 @@ class SingleOnlineContentFormViewMixin(SingleOnlineContentViewMixin, ModalFormVi
     denied_if_lock = False  # denied the use of the form if the content is locked
 
     def dispatch(self, request, *args, **kwargs):
+        print('passé par là?')
         self.public_content_object = self.get_public_object()
         self.object = self.get_object()
         self.versioned_object = self.get_versioned_object()
+
+        print('jusque là ?')
 
         if self.denied_if_lock and self.object.is_locked:
             raise PermissionDenied
