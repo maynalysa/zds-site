@@ -70,7 +70,7 @@ Quitter un virtualenv :
   deactivate
 
 
-Installation des des dépendances front et back
+Installation des dépendances front et back
 ==============================================
 
 .. sourcecode:: bash
